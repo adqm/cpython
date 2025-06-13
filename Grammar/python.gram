@@ -1039,7 +1039,7 @@ setcomp[expr_ty]:
     | invalid_comprehension
 
 genexp[expr_ty]:
-    | '(' a=( assignment_expression | expression !':=') b=for_if_clauses ')' { _PyAST_GeneratorExp(a, b, EXTRA) }
+    | '(' a=named_expression b=for_if_clauses ')' { _PyAST_GeneratorExp(a, b, EXTRA) }
     | invalid_comprehension
 
 dictcomp[expr_ty]:
