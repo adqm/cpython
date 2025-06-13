@@ -4486,17 +4486,36 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
         /* comprehension specific code */
         switch (type) {
         case COMP_GENEXP:
-            VISIT(c, expr, elt);
-            ADDOP_YIELD(c, elt_loc);
-            ADDOP(c, elt_loc, POP_TOP);
+            if (elt -> kind == Starred_kind){
+                location realelt_loc = LOC(elt->v.Starred.value);
+                VISIT(c, expr, elt->v.Starred.value);
+                ADDOP(c, realelt_loc, GET_YIELD_FROM_ITER);
+                ADDOP_LOAD_CONST(c, realelt_loc, Py_None);
+                ADD_YIELD_FROM(c, realelt_loc, 0);
+                ADDOP(c, realelt_loc, POP_TOP);
+            }else{
+                VISIT(c, expr, elt);
+                ADDOP_YIELD(c, elt_loc);
+                ADDOP(c, elt_loc, POP_TOP);
+            }
             break;
         case COMP_LISTCOMP:
-            VISIT(c, expr, elt);
-            ADDOP_I(c, elt_loc, LIST_APPEND, depth + 1);
+            if (elt -> kind == Starred_kind){
+                VISIT(c, expr, elt->v.Starred.value);
+                ADDOP_I(c, elt_loc, LIST_EXTEND, depth + 1);
+            }else{
+                VISIT(c, expr, elt);
+                ADDOP_I(c, elt_loc, LIST_APPEND, depth + 1);
+            }
             break;
         case COMP_SETCOMP:
-            VISIT(c, expr, elt);
-            ADDOP_I(c, elt_loc, SET_ADD, depth + 1);
+            if (elt -> kind == Starred_kind){
+                VISIT(c, expr, elt->v.Starred.value);
+                ADDOP_I(c, elt_loc, SET_UPDATE, depth + 1);
+            }else{
+                VISIT(c, expr, elt);
+                ADDOP_I(c, elt_loc, SET_ADD, depth + 1);
+            }
             break;
         case COMP_DICTCOMP:
             /* With '{k: v}', k is evaluated before v, so we do
