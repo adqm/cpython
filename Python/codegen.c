@@ -4519,15 +4519,21 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
             }
             break;
         case COMP_DICTCOMP:
-            /* With '{k: v}', k is evaluated before v, so we do
-               the same. */
-            VISIT(c, expr, elt);
-            VISIT(c, expr, val);
-            elt_loc = LOCATION(elt->lineno,
-                               val->end_lineno,
-                               elt->col_offset,
-                               val->end_col_offset);
-            ADDOP_I(c, elt_loc, MAP_ADD, depth + 1);
+            if (val == NULL){
+                // dict unpacking case
+                VISIT(c, expr, elt);
+                ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
+            }else{
+                /* With '{k: v}', k is evaluated before v, so we do
+                the same. */
+                VISIT(c, expr, elt);
+                VISIT(c, expr, val);
+                elt_loc = LOCATION(elt->lineno,
+                                   val->end_lineno,
+                                   elt->col_offset,
+                                   val->end_col_offset);
+                ADDOP_I(c, elt_loc, MAP_ADD, depth + 1);
+            }
             break;
         default:
             return ERROR;

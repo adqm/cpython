@@ -1044,7 +1044,8 @@ genexp[expr_ty]:
     | invalid_comprehension
 
 dictcomp[expr_ty]:
-    | '{' a=double_starred_kvpair b=for_if_clauses '}' { _PyAST_DictComp(a->key, a->value, b, EXTRA) }
+    | '{' a=kvpair b=for_if_clauses '}' { _PyAST_DictComp(a->key, a->value, b, EXTRA) }
+    | '{' '**' a=expression b=for_if_clauses '}' { _PyAST_DictComp(a, NULL, b, EXTRA) }
     | invalid_dict_comprehension
 
 # FUNCTION CALL ARGUMENTS
