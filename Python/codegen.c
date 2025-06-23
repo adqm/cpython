@@ -4488,12 +4488,11 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
         switch (type) {
         case COMP_GENEXP:
             if (elt->kind == Starred_kind){
-                location realelt_loc = LOC(elt->v.Starred.value);
                 VISIT(c, expr, elt->v.Starred.value);
-                ADDOP(c, realelt_loc, GET_YIELD_FROM_ITER);
-                ADDOP_LOAD_CONST(c, realelt_loc, Py_None);
-                ADD_YIELD_FROM(c, realelt_loc, 0);
-                ADDOP(c, realelt_loc, POP_TOP);
+                ADDOP(c, elt_loc, GET_YIELD_FROM_ITER);
+                ADDOP_LOAD_CONST(c, elt_loc, Py_None);
+                ADD_YIELD_FROM(c, elt_loc, 0);
+                ADDOP(c, elt_loc, POP_TOP);
             }else{
                 VISIT(c, expr, elt);
                 ADDOP_YIELD(c, elt_loc);
@@ -4618,12 +4617,20 @@ codegen_async_comprehension_generator(compiler *c, location loc,
         switch (type) {
         case COMP_GENEXP:
             if (elt->kind == Starred_kind){
-                location realelt_loc = LOC(elt->v.Starred.value);
+                // ADD_YIELD_FROM won't work here so we need an explicit loop
+                // this block is loosely based on codegen_for
+                NEW_JUMP_TARGET_LABEL(c, async_unpack_start);
+                NEW_JUMP_TARGET_LABEL(c, async_unpack_end);
                 VISIT(c, expr, elt->v.Starred.value);
-                ADDOP(c, realelt_loc, GET_YIELD_FROM_ITER);
-                ADDOP_LOAD_CONST(c, realelt_loc, Py_None);
-                ADD_YIELD_FROM(c, realelt_loc, 0);
-                ADDOP(c, realelt_loc, POP_TOP);
+                ADDOP(c, elt_loc, GET_ITER);
+                USE_LABEL(c, async_unpack_start);
+                ADDOP_JUMP(c, elt_loc, FOR_ITER, async_unpack_end);
+                ADDOP_YIELD(c, elt_loc);
+                ADDOP(c, elt_loc, POP_TOP);
+                ADDOP_JUMP(c, NO_LOCATION, JUMP, async_unpack_start);
+                USE_LABEL(c, async_unpack_end);
+                ADDOP(c, NO_LOCATION, END_FOR);
+                ADDOP(c, NO_LOCATION, POP_ITER);
             }else{
                 VISIT(c, expr, elt);
                 ADDOP_YIELD(c, elt_loc);
