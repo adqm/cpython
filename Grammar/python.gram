@@ -1044,7 +1044,7 @@ genexp[expr_ty]:
 
 dictcomp[expr_ty]:
     | '{' a=kvpair b=for_if_clauses '}' { _PyAST_DictComp(a->key, a->value, b, EXTRA) }
-    | '{' '**' a=expression b=for_if_clauses '}' { _PyAST_DictComp(a, NULL, b, EXTRA) }
+    | '{' '**' a=bitwise_or b=for_if_clauses '}' { _PyAST_DictComp(a, NULL, b, EXTRA) }
 
 # FUNCTION CALL ARGUMENTS
 # =======================
@@ -1495,7 +1495,10 @@ invalid_class_def_raw:
 
 invalid_double_starred_kvpairs:
     | ','.double_starred_kvpair+ ',' invalid_kvpair
-    | expression ':' a='*' bitwise_or { RAISE_SYNTAX_ERROR_STARTING_FROM(a, "cannot use a starred expression in a dictionary value") }
+    | a='*' b=bitwise_or ':' expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use a starred expression in a dictionary key") }
+    | a='**' b=bitwise_or ':' expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking in a dictionary key") }
+    | expression ':' a='*' b=bitwise_or { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use a starred expression in a dictionary value") }
+    | expression ':' a='**' b=bitwise_or { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking in a dictionary value") }
     | expression a=':' &('}'|',') { RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "expression expected after dictionary key and ':'") }
 invalid_kvpair:
     | a=expression !(':') {

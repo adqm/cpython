@@ -18058,7 +18058,7 @@ genexp_rule(Parser *p)
     return _res;
 }
 
-// dictcomp: '{' kvpair for_if_clauses '}' | '{' '**' expression for_if_clauses '}'
+// dictcomp: '{' kvpair for_if_clauses '}' | '{' '**' bitwise_or for_if_clauses '}'
 static expr_ty
 dictcomp_rule(Parser *p)
 {
@@ -18122,12 +18122,12 @@ dictcomp_rule(Parser *p)
         D(fprintf(stderr, "%*c%s dictcomp[%d-%d]: %s failed!\n", p->level, ' ',
                   p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'{' kvpair for_if_clauses '}'"));
     }
-    { // '{' '**' expression for_if_clauses '}'
+    { // '{' '**' bitwise_or for_if_clauses '}'
         if (p->error_indicator) {
             p->level--;
             return NULL;
         }
-        D(fprintf(stderr, "%*c> dictcomp[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "'{' '**' expression for_if_clauses '}'"));
+        D(fprintf(stderr, "%*c> dictcomp[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "'{' '**' bitwise_or for_if_clauses '}'"));
         Token * _literal;
         Token * _literal_1;
         Token * _literal_2;
@@ -18138,14 +18138,14 @@ dictcomp_rule(Parser *p)
             &&
             (_literal_1 = _PyPegen_expect_token(p, 35))  // token='**'
             &&
-            (a = expression_rule(p))  // expression
+            (a = bitwise_or_rule(p))  // bitwise_or
             &&
             (b = for_if_clauses_rule(p))  // for_if_clauses
             &&
             (_literal_2 = _PyPegen_expect_token(p, 26))  // token='}'
         )
         {
-            D(fprintf(stderr, "%*c+ dictcomp[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "'{' '**' expression for_if_clauses '}'"));
+            D(fprintf(stderr, "%*c+ dictcomp[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "'{' '**' bitwise_or for_if_clauses '}'"));
             Token *_token = _PyPegen_get_last_nonnwhitespace_token(p);
             if (_token == NULL) {
                 p->level--;
@@ -18165,7 +18165,7 @@ dictcomp_rule(Parser *p)
         }
         p->mark = _mark;
         D(fprintf(stderr, "%*c%s dictcomp[%d-%d]: %s failed!\n", p->level, ' ',
-                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'{' '**' expression for_if_clauses '}'"));
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'{' '**' bitwise_or for_if_clauses '}'"));
     }
     _res = NULL;
   done:
@@ -25894,7 +25894,10 @@ invalid_class_def_raw_rule(Parser *p)
 
 // invalid_double_starred_kvpairs:
 //     | ','.double_starred_kvpair+ ',' invalid_kvpair
+//     | '*' bitwise_or ':' expression
+//     | '**' bitwise_or ':' expression
 //     | expression ':' '*' bitwise_or
+//     | expression ':' '**' bitwise_or
 //     | expression ':' &('}' | ',')
 static void *
 invalid_double_starred_kvpairs_rule(Parser *p)
@@ -25933,6 +25936,72 @@ invalid_double_starred_kvpairs_rule(Parser *p)
         D(fprintf(stderr, "%*c%s invalid_double_starred_kvpairs[%d-%d]: %s failed!\n", p->level, ' ',
                   p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "','.double_starred_kvpair+ ',' invalid_kvpair"));
     }
+    { // '*' bitwise_or ':' expression
+        if (p->error_indicator) {
+            p->level--;
+            return NULL;
+        }
+        D(fprintf(stderr, "%*c> invalid_double_starred_kvpairs[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "'*' bitwise_or ':' expression"));
+        Token * _literal;
+        Token * a;
+        expr_ty b;
+        expr_ty expression_var;
+        if (
+            (a = _PyPegen_expect_token(p, 16))  // token='*'
+            &&
+            (b = bitwise_or_rule(p))  // bitwise_or
+            &&
+            (_literal = _PyPegen_expect_token(p, 11))  // token=':'
+            &&
+            (expression_var = expression_rule(p))  // expression
+        )
+        {
+            D(fprintf(stderr, "%*c+ invalid_double_starred_kvpairs[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "'*' bitwise_or ':' expression"));
+            _res = RAISE_SYNTAX_ERROR_KNOWN_RANGE ( a , b , "cannot use a starred expression in a dictionary key" );
+            if (_res == NULL && PyErr_Occurred()) {
+                p->error_indicator = 1;
+                p->level--;
+                return NULL;
+            }
+            goto done;
+        }
+        p->mark = _mark;
+        D(fprintf(stderr, "%*c%s invalid_double_starred_kvpairs[%d-%d]: %s failed!\n", p->level, ' ',
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'*' bitwise_or ':' expression"));
+    }
+    { // '**' bitwise_or ':' expression
+        if (p->error_indicator) {
+            p->level--;
+            return NULL;
+        }
+        D(fprintf(stderr, "%*c> invalid_double_starred_kvpairs[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "'**' bitwise_or ':' expression"));
+        Token * _literal;
+        Token * a;
+        expr_ty b;
+        expr_ty expression_var;
+        if (
+            (a = _PyPegen_expect_token(p, 35))  // token='**'
+            &&
+            (b = bitwise_or_rule(p))  // bitwise_or
+            &&
+            (_literal = _PyPegen_expect_token(p, 11))  // token=':'
+            &&
+            (expression_var = expression_rule(p))  // expression
+        )
+        {
+            D(fprintf(stderr, "%*c+ invalid_double_starred_kvpairs[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "'**' bitwise_or ':' expression"));
+            _res = RAISE_SYNTAX_ERROR_KNOWN_RANGE ( a , b , "cannot use dict unpacking in a dictionary key" );
+            if (_res == NULL && PyErr_Occurred()) {
+                p->error_indicator = 1;
+                p->level--;
+                return NULL;
+            }
+            goto done;
+        }
+        p->mark = _mark;
+        D(fprintf(stderr, "%*c%s invalid_double_starred_kvpairs[%d-%d]: %s failed!\n", p->level, ' ',
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'**' bitwise_or ':' expression"));
+    }
     { // expression ':' '*' bitwise_or
         if (p->error_indicator) {
             p->level--;
@@ -25941,7 +26010,7 @@ invalid_double_starred_kvpairs_rule(Parser *p)
         D(fprintf(stderr, "%*c> invalid_double_starred_kvpairs[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "expression ':' '*' bitwise_or"));
         Token * _literal;
         Token * a;
-        expr_ty bitwise_or_var;
+        expr_ty b;
         expr_ty expression_var;
         if (
             (expression_var = expression_rule(p))  // expression
@@ -25950,11 +26019,11 @@ invalid_double_starred_kvpairs_rule(Parser *p)
             &&
             (a = _PyPegen_expect_token(p, 16))  // token='*'
             &&
-            (bitwise_or_var = bitwise_or_rule(p))  // bitwise_or
+            (b = bitwise_or_rule(p))  // bitwise_or
         )
         {
             D(fprintf(stderr, "%*c+ invalid_double_starred_kvpairs[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "expression ':' '*' bitwise_or"));
-            _res = RAISE_SYNTAX_ERROR_STARTING_FROM ( a , "cannot use a starred expression in a dictionary value" );
+            _res = RAISE_SYNTAX_ERROR_KNOWN_RANGE ( a , b , "cannot use a starred expression in a dictionary value" );
             if (_res == NULL && PyErr_Occurred()) {
                 p->error_indicator = 1;
                 p->level--;
@@ -25965,6 +26034,39 @@ invalid_double_starred_kvpairs_rule(Parser *p)
         p->mark = _mark;
         D(fprintf(stderr, "%*c%s invalid_double_starred_kvpairs[%d-%d]: %s failed!\n", p->level, ' ',
                   p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "expression ':' '*' bitwise_or"));
+    }
+    { // expression ':' '**' bitwise_or
+        if (p->error_indicator) {
+            p->level--;
+            return NULL;
+        }
+        D(fprintf(stderr, "%*c> invalid_double_starred_kvpairs[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "expression ':' '**' bitwise_or"));
+        Token * _literal;
+        Token * a;
+        expr_ty b;
+        expr_ty expression_var;
+        if (
+            (expression_var = expression_rule(p))  // expression
+            &&
+            (_literal = _PyPegen_expect_token(p, 11))  // token=':'
+            &&
+            (a = _PyPegen_expect_token(p, 35))  // token='**'
+            &&
+            (b = bitwise_or_rule(p))  // bitwise_or
+        )
+        {
+            D(fprintf(stderr, "%*c+ invalid_double_starred_kvpairs[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "expression ':' '**' bitwise_or"));
+            _res = RAISE_SYNTAX_ERROR_KNOWN_RANGE ( a , b , "cannot use dict unpacking in a dictionary value" );
+            if (_res == NULL && PyErr_Occurred()) {
+                p->error_indicator = 1;
+                p->level--;
+                return NULL;
+            }
+            goto done;
+        }
+        p->mark = _mark;
+        D(fprintf(stderr, "%*c%s invalid_double_starred_kvpairs[%d-%d]: %s failed!\n", p->level, ' ',
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "expression ':' '**' bitwise_or"));
     }
     { // expression ':' &('}' | ',')
         if (p->error_indicator) {
