@@ -141,7 +141,7 @@ Dict display element unpacking
     >>> {0:1, **{0:2}, 0:3, 0:4}
     {0: 4}
 
-List comprehension element unpacking
+Comprehension element unpacking
 
     >>> a, b, c = [0, 1, 2], 3, 4
     >>> [*a, b, c]
@@ -149,46 +149,97 @@ List comprehension element unpacking
 
     >>> l = [a, (3, 4), {5}, {6: None}, (i for i in range(7, 10))]
     >>> [*item for item in l]
-    Traceback (most recent call last):
-    ...
-    SyntaxError: iterable unpacking cannot be used in comprehension
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-    >>> [*[0, 1] for i in range(10)]
-    Traceback (most recent call last):
-    ...
-    SyntaxError: iterable unpacking cannot be used in comprehension
+    >>> [*[0, 1] for i in range(5)]
+    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
 
-    >>> [*'a' for i in range(10)]
-    Traceback (most recent call last):
-    ...
-    SyntaxError: iterable unpacking cannot be used in comprehension
+    >>> [*'a' for i in range(5)]
+    ['a', 'a', 'a', 'a', 'a']
 
     >>> [*[] for i in range(10)]
-    Traceback (most recent call last):
-    ...
-    SyntaxError: iterable unpacking cannot be used in comprehension
+    []
+
+    >>> [*(x*2) for x in [[1, 2, 3], [], 'cat']]
+    [1, 2, 3, 1, 2, 3, 'c', 'a', 't', 'c', 'a', 't']
 
     >>> {**{} for a in [1]}
+    {}
+
+    >>> {**{7: i} for i in range(10)}
+    {7: 9}
+
+    >>> dicts = [{1: 2}, {3: 4}, {5: 6, 7: 8}, {}, {9: 10}, {1: 0}]
+    >>> {**d for d in dicts}
+    {1: 0, 3: 4, 5: 6, 7: 8, 9: 10}
+
+    >>> gen = (*(0, 1) for i in range(5))
+    >>> next(gen)
+    0
+    >>> list(gen)
+    [1, 0, 1, 0, 1, 0, 1, 0, 1]
+
+Malformed comperehension element unpacking
+
+    >>> [*x for x in [1, 2, 3]]
     Traceback (most recent call last):
     ...
-    SyntaxError: dict unpacking cannot be used in dict comprehension
+    [*x for x in [1, 2, 3]]
+     ^^
+    TypeError: Value after * must be an iterable, not int
+    >>> [**x for x in [{1: 2}]]
+    Traceback (most recent call last):
+    ...
+    [**x for x in [{1: 2}]]
+     ^^^
+    SyntaxError: dict unpacking cannot be used in list comprehension
+
+    >>> {*a: b for a, b in {1: 2}.items()}
+    Traceback (most recent call last):
+    ...
+    {*a: b for a, b in {1: 2}.items()}
+     ^^
+    SyntaxError: cannot use a starred expression in a dictionary key
+
+    >>> {**a: b for a, b in {1: 2}.items()}
+    Traceback (most recent call last):
+    ...
+    {**a: b for a, b in {1: 2}.items()}
+     ^^^
+    SyntaxError: cannot use dict unpacking in a dictionary key
+
+    >>> {a: *b for a, b in {1: 2}.items()}
+    Traceback (most recent call last):
+    ...
+    {a: *b for a, b in {1: 2}.items()}
+        ^^
+    SyntaxError: cannot use a starred expression in a dictionary value
+
+    >>> {a: **b for a, b in {1: 2}.items()}
+    Traceback (most recent call last):
+    ...
+    {a: **b for a, b in {1: 2}.items()}
+        ^^^
+    SyntaxError: cannot use dict unpacking in a dictionary value
+
 
 # Pegen is better here.
 # Generator expression in function arguments
 
-#     >>> list(*x for x in (range(5) for i in range(3)))
-#     Traceback (most recent call last):
-#     ...
-#         list(*x for x in (range(5) for i in range(3)))
-#                   ^
-#     SyntaxError: invalid syntax
+    >>> list(*x for x in (range(5) for i in range(3)))
+    [0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4]
+
+    >>> def f(arg):
+    ...     print(type(arg), list(arg), list(arg))
+    >>> f(*x for x in [[1,2,3]])
+    <class 'generator'> [1, 2, 3] []
 
     >>> dict(**x for x in [{1:2}])
     Traceback (most recent call last):
     ...
         dict(**x for x in [{1:2}])
-                   ^
-    SyntaxError: invalid syntax
+             ^^^
+    SyntaxError: dict unpacking cannot be used in generator expression
 
 Iterable argument unpacking
 
