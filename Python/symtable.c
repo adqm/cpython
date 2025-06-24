@@ -3030,7 +3030,8 @@ symtable_handle_comprehension(struct symtable *st, expr_ty e,
     VISIT_SEQ_TAIL(st, comprehension, generators, 1);
     if (value)
         VISIT(st, expr, value);
-    VISIT(st, expr, elt);
+    if (elt)
+        VISIT(st, expr, elt);
     st->st_cur->ste_generator = is_generator;
     int is_async = st->st_cur->ste_coroutine && !is_generator;
     if (!symtable_exit_block(st)) {

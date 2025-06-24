@@ -18058,7 +18058,7 @@ genexp_rule(Parser *p)
     return _res;
 }
 
-// dictcomp: '{' kvpair for_if_clauses '}' | '{' '**' bitwise_or for_if_clauses '}'
+// dictcomp: '{' double_starred_kvpair for_if_clauses '}'
 static expr_ty
 dictcomp_rule(Parser *p)
 {
@@ -18080,12 +18080,12 @@ dictcomp_rule(Parser *p)
     UNUSED(_start_lineno); // Only used by EXTRA macro
     int _start_col_offset = p->tokens[_mark]->col_offset;
     UNUSED(_start_col_offset); // Only used by EXTRA macro
-    { // '{' kvpair for_if_clauses '}'
+    { // '{' double_starred_kvpair for_if_clauses '}'
         if (p->error_indicator) {
             p->level--;
             return NULL;
         }
-        D(fprintf(stderr, "%*c> dictcomp[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "'{' kvpair for_if_clauses '}'"));
+        D(fprintf(stderr, "%*c> dictcomp[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "'{' double_starred_kvpair for_if_clauses '}'"));
         Token * _literal;
         Token * _literal_1;
         KeyValuePair* a;
@@ -18093,14 +18093,14 @@ dictcomp_rule(Parser *p)
         if (
             (_literal = _PyPegen_expect_token(p, 25))  // token='{'
             &&
-            (a = kvpair_rule(p))  // kvpair
+            (a = double_starred_kvpair_rule(p))  // double_starred_kvpair
             &&
             (b = for_if_clauses_rule(p))  // for_if_clauses
             &&
             (_literal_1 = _PyPegen_expect_token(p, 26))  // token='}'
         )
         {
-            D(fprintf(stderr, "%*c+ dictcomp[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "'{' kvpair for_if_clauses '}'"));
+            D(fprintf(stderr, "%*c+ dictcomp[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "'{' double_starred_kvpair for_if_clauses '}'"));
             Token *_token = _PyPegen_get_last_nonnwhitespace_token(p);
             if (_token == NULL) {
                 p->level--;
@@ -18120,52 +18120,7 @@ dictcomp_rule(Parser *p)
         }
         p->mark = _mark;
         D(fprintf(stderr, "%*c%s dictcomp[%d-%d]: %s failed!\n", p->level, ' ',
-                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'{' kvpair for_if_clauses '}'"));
-    }
-    { // '{' '**' bitwise_or for_if_clauses '}'
-        if (p->error_indicator) {
-            p->level--;
-            return NULL;
-        }
-        D(fprintf(stderr, "%*c> dictcomp[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "'{' '**' bitwise_or for_if_clauses '}'"));
-        Token * _literal;
-        Token * _literal_1;
-        Token * _literal_2;
-        expr_ty a;
-        asdl_comprehension_seq* b;
-        if (
-            (_literal = _PyPegen_expect_token(p, 25))  // token='{'
-            &&
-            (_literal_1 = _PyPegen_expect_token(p, 35))  // token='**'
-            &&
-            (a = bitwise_or_rule(p))  // bitwise_or
-            &&
-            (b = for_if_clauses_rule(p))  // for_if_clauses
-            &&
-            (_literal_2 = _PyPegen_expect_token(p, 26))  // token='}'
-        )
-        {
-            D(fprintf(stderr, "%*c+ dictcomp[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "'{' '**' bitwise_or for_if_clauses '}'"));
-            Token *_token = _PyPegen_get_last_nonnwhitespace_token(p);
-            if (_token == NULL) {
-                p->level--;
-                return NULL;
-            }
-            int _end_lineno = _token->end_lineno;
-            UNUSED(_end_lineno); // Only used by EXTRA macro
-            int _end_col_offset = _token->end_col_offset;
-            UNUSED(_end_col_offset); // Only used by EXTRA macro
-            _res = _PyAST_DictComp ( a , NULL , b , EXTRA );
-            if (_res == NULL && PyErr_Occurred()) {
-                p->error_indicator = 1;
-                p->level--;
-                return NULL;
-            }
-            goto done;
-        }
-        p->mark = _mark;
-        D(fprintf(stderr, "%*c%s dictcomp[%d-%d]: %s failed!\n", p->level, ' ',
-                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'{' '**' bitwise_or for_if_clauses '}'"));
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'{' double_starred_kvpair for_if_clauses '}'"));
     }
     _res = NULL;
   done:

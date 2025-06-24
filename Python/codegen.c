@@ -4479,7 +4479,12 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
                                             elt, val, type, 0));
     }
 
-    location elt_loc = LOC(elt);
+    location elt_loc;
+    if (elt != NULL){
+        elt_loc = LOC(elt);
+    }else{
+        elt_loc = LOC(val);
+    }
 
     /* only append after the last for generator */
     if (gen_index >= asdl_seq_LEN(generators)) {
@@ -4517,9 +4522,9 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
             }
             break;
         case COMP_DICTCOMP:
-            if (val == NULL){
+            if (elt == NULL){
                 // dict unpacking case
-                VISIT(c, expr, elt);
+                VISIT(c, expr, val);
                 ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
             }else{
                 /* With '{k: v}', k is evaluated before v, so we do
@@ -4609,7 +4614,13 @@ codegen_async_comprehension_generator(compiler *c, location loc,
                                             elt, val, type, 0));
     }
 
-    location elt_loc = LOC(elt);
+    location elt_loc;
+    if (elt != NULL){
+        elt_loc = LOC(elt);
+    }else{
+        elt_loc = LOC(val);
+    }
+
     /* only append after the last for generator */
     if (gen_index >= asdl_seq_LEN(generators)) {
         /* comprehension specific code */
@@ -4655,9 +4666,9 @@ codegen_async_comprehension_generator(compiler *c, location loc,
             }
             break;
         case COMP_DICTCOMP:
-            if (val == NULL){
+            if (elt == NULL){
                 // dict unpacking case
-                VISIT(c, expr, elt);
+                VISIT(c, expr, val);
                 ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
             }else{
                 /* With '{k: v}', k is evaluated before v, so we do

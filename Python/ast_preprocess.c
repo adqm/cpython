@@ -528,10 +528,10 @@ astfold_expr(expr_ty node_, PyArena *ctx_, _PyASTPreprocessState *state)
         CALL_SEQ(astfold_comprehension, comprehension, node_->v.SetComp.generators);
         break;
     case DictComp_kind:
-        CALL(astfold_expr, expr_ty, node_->v.DictComp.key);
-        if (node_->v.DictComp.value != NULL){
-            CALL(astfold_expr, expr_ty, node_->v.DictComp.value);
+        if (node_->v.DictComp.key != NULL){
+            CALL(astfold_expr, expr_ty, node_->v.DictComp.key);
         }
+        CALL(astfold_expr, expr_ty, node_->v.DictComp.value);
         CALL_SEQ(astfold_comprehension, comprehension, node_->v.DictComp.generators);
         break;
     case GeneratorExp_kind:
