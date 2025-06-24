@@ -179,6 +179,41 @@ Comprehension element unpacking
     >>> list(gen)
     [1, 0, 1, 0, 1, 0, 1, 0, 1]
 
+Scoping of starred comprehension targets
+
+    >>> [*((y := i**2), 2*y) for i in range(4)]
+    [0, 0, 1, 2, 4, 8, 9, 18]
+    >>> y
+    9
+
+    >>> [*(y := [i, i+1, i+2]) for i in range(4)]
+    [0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5]
+    >>> y
+    [3, 4, 5]
+
+    >>> g = (*(z := [i, i+1, i+2]) for i in range(4))
+    >>> z
+    Traceback (most recent call last):
+    ...
+    NameError: name 'z' is not defined
+    >>> next(g)
+    0
+    >>> z
+    [0, 1, 2]
+    >>> next(g)
+    1
+    >>> z
+    [0, 1, 2]
+    >>> next(g)
+    2
+    >>> z
+    [0, 1, 2]
+    >>> next(g)
+    1
+    >>> z
+    [1, 2, 3]
+
+
 Malformed comperehension element unpacking
 
     >>> [*x for x in [1, 2, 3]]
