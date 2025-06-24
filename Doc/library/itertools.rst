@@ -208,6 +208,13 @@ loops that truncate the stream.
           for iterable in iterables:
               yield from iterable
 
+   .. note::
+
+      Since version 3.15, the following is also roughly equivalent::
+
+         def chain(iterables):
+             return (*iterable for iterable in iterables)
+
 
 .. classmethod:: chain.from_iterable(iterable)
 
@@ -218,6 +225,13 @@ loops that truncate the stream.
           # chain.from_iterable(['ABC', 'DEF']) → A B C D E F
           for iterable in iterables:
               yield from iterable
+
+   .. note::
+
+      Since version 3.15, the following is also roughly equivalent::
+
+         def from_iterable(iterables):
+             return (*iterable for iterable in iterables)
 
 
 .. function:: combinations(iterable, r)
