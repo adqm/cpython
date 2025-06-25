@@ -4485,7 +4485,8 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
                 ADDOP_LOAD_CONST(c, elt_loc, Py_None);
                 ADD_YIELD_FROM(c, elt_loc, 0);
                 ADDOP(c, elt_loc, POP_TOP);
-            }else{
+            }
+            else{
                 VISIT(c, expr, elt);
                 ADDOP_YIELD(c, elt_loc);
                 ADDOP(c, elt_loc, POP_TOP);
@@ -4495,7 +4496,8 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
             if (elt->kind == Starred_kind){
                 VISIT(c, expr, elt->v.Starred.value);
                 ADDOP_I(c, elt_loc, LIST_EXTEND, depth + 1);
-            }else{
+            }
+            else{
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, LIST_APPEND, depth + 1);
             }
@@ -4504,7 +4506,8 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
             if (elt->kind == Starred_kind){
                 VISIT(c, expr, elt->v.Starred.value);
                 ADDOP_I(c, elt_loc, SET_UPDATE, depth + 1);
-            }else{
+            }
+            else{
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, SET_ADD, depth + 1);
             }
@@ -4514,7 +4517,8 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
                 // dict unpacking case
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
-            }else{
+            }
+            else{
                 /* With '{k: v}', k is evaluated before v, so we do
                 the same. */
                 VISIT(c, expr, elt);
@@ -4623,7 +4627,8 @@ codegen_async_comprehension_generator(compiler *c, location loc,
                 USE_LABEL(c, async_unpack_end);
                 ADDOP(c, NO_LOCATION, END_FOR);
                 ADDOP(c, NO_LOCATION, POP_ITER);
-            }else{
+            }
+            else{
                 VISIT(c, expr, elt);
                 ADDOP_YIELD(c, elt_loc);
                 ADDOP(c, elt_loc, POP_TOP);
@@ -4633,7 +4638,8 @@ codegen_async_comprehension_generator(compiler *c, location loc,
             if (elt->kind == Starred_kind){
                 VISIT(c, expr, elt->v.Starred.value);
                 ADDOP_I(c, elt_loc, LIST_EXTEND, depth + 1);
-            }else{
+            }
+            else{
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, LIST_APPEND, depth + 1);
             }
@@ -4642,7 +4648,8 @@ codegen_async_comprehension_generator(compiler *c, location loc,
             if (elt->kind == Starred_kind){
                 VISIT(c, expr, elt->v.Starred.value);
                 ADDOP_I(c, elt_loc, SET_UPDATE, depth + 1);
-            }else{
+            }
+            else{
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, SET_ADD, depth + 1);
             }
@@ -4652,7 +4659,8 @@ codegen_async_comprehension_generator(compiler *c, location loc,
                 // dict unpacking case
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
-            }else{
+            }
+            else{
                 /* With '{k: v}', k is evaluated before v, so we do
                 the same. */
                 VISIT(c, expr, elt);
