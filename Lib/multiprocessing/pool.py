@@ -420,7 +420,7 @@ class Pool(object):
                                                   task_batches),
                     result._set_length
                 ))
-            return (item for chunk in result for item in chunk)
+            return (*chunk for chunk in result)
 
     def imap_unordered(self, func, iterable, chunksize=1):
         '''
@@ -448,7 +448,7 @@ class Pool(object):
                                                   task_batches),
                     result._set_length
                 ))
-            return (item for chunk in result for item in chunk)
+            return (*chunk for chunk in result)
 
     def apply_async(self, func, args=(), kwds={}, callback=None,
             error_callback=None):

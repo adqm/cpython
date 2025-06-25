@@ -75,7 +75,7 @@ def _build_tree(id2name, awaits):
 
 
 def _roots(id2label, children):
-    all_children = {c for kids in children.values() for c in kids}
+    all_children = {*kids for kids in children.values()}
     return [n for n in id2label if n not in all_children]
 
 # ─── detect cycles in the task-to-task graph ───────────────────────

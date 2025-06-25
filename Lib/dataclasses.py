@@ -1287,9 +1287,7 @@ def _add_slots(cls, is_frozen, weakref_slot, defined_fields):
     cls_dict = dict(cls.__dict__)
     field_names = tuple(f.name for f in fields(cls))
     # Make sure slots don't overlap with those in base classes.
-    inherited_slots = set(
-        itertools.chain.from_iterable(map(_get_slots, cls.__mro__[1:-1]))
-    )
+    inherited_slots = {*_get_slots(c) for c in cls.__mro__[1:-1]}
 
     cls_dict["__slots__"] = _create_slots(
         defined_fields, inherited_slots, field_names, weakref_slot,

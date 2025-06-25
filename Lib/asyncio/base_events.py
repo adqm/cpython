@@ -1155,7 +1155,7 @@ class BaseEventLoop(events.AbstractEventLoop):
                 ))[0]  # can't use sock, _, _ as it keeks a reference to exceptions
 
             if sock is None:
-                exceptions = [exc for sub in exceptions for exc in sub]
+                exceptions = [*sub for sub in exceptions]
                 try:
                     if all_errors:
                         raise ExceptionGroup("create_connection failed", exceptions)

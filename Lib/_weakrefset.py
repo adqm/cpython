@@ -135,7 +135,7 @@ class WeakSet:
         return self
 
     def union(self, other):
-        return self.__class__(e for s in (self, other) for e in s)
+        return self.__class__(*s for s in (self, other))
     __or__ = union
 
     def isdisjoint(self, other):

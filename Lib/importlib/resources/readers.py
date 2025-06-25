@@ -78,7 +78,7 @@ class MultiplexedPath(abc.Traversable):
             raise NotADirectoryError('MultiplexedPath only supports directories')
 
     def iterdir(self):
-        children = (child for path in self._paths for child in path.iterdir())
+        children = (*path.iterdir() for path in self._paths)
         by_name = operator.attrgetter('name')
         groups = itertools.groupby(sorted(children, key=by_name), key=by_name)
         return map(self._follow, (locs for name, locs in groups))

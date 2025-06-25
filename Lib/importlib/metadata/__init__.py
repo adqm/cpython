@@ -424,9 +424,7 @@ class Distribution(DeprecatedNonAbstract):
         if context and kwargs:
             raise ValueError("cannot accept context and kwargs")
         context = context or DistributionFinder.Context(**kwargs)
-        return itertools.chain.from_iterable(
-            resolver(context) for resolver in cls._discover_resolvers()
-        )
+        return (*resolver(context) for resolver in cls._discover_resolvers())
 
     @staticmethod
     def at(path: str | os.PathLike[str]) -> Distribution:
@@ -887,9 +885,7 @@ class MetadataPathFinder(DistributionFinder):
     def _search_paths(cls, name, paths):
         """Find metadata directories in paths heuristically."""
         prepared = Prepared(name)
-        return itertools.chain.from_iterable(
-            path.search(prepared) for path in map(FastPath, paths)
-        )
+        return (*FastPath(path).search(prepared) for path in paths)
 
     @classmethod
     def invalidate_caches(cls) -> None:
@@ -1005,10 +1001,7 @@ def entry_points(**params) -> EntryPoints:
 
     :return: EntryPoints for all installed packages.
     """
-    eps = itertools.chain.from_iterable(
-        dist.entry_points for dist in _unique(distributions())
-    )
-    return EntryPoints(eps).select(**params)
+    return EntryPoints(*dist.entry_points for dist in _unique(distributions())).select(**params)
 
 
 def files(distribution_name: str) -> Optional[List[PackagePath]]:

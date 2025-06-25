@@ -111,9 +111,7 @@ class Traversable(Protocol):
         """
         if not descendants:
             return self
-        names = itertools.chain.from_iterable(
-            path.parts for path in map(pathlib.PurePosixPath, descendants)
-        )
+        names = (*pathlib.PurePosixPath(descendant).parts for descendant in descendants)
         target = next(names)
         matches = (
             traversable for traversable in self.iterdir() if traversable.name == target

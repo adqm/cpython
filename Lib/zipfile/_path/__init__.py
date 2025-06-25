@@ -111,7 +111,7 @@ class CompleteDirs(InitializedState, zipfile.ZipFile):
 
     @staticmethod
     def _implied_dirs(names):
-        parents = itertools.chain.from_iterable(map(_parents, names))
+        parents = (*_parents(name) for name in names)
         as_dirs = (p + posixpath.sep for p in parents)
         return _dedupe(_difference(as_dirs, names))
 

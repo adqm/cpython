@@ -113,10 +113,10 @@ class ModuleCompleter:
         """Iterate over all submodules of the given parent modules."""
         specs = [info.module_finder.find_spec(info.name, None)
                  for info in parent_modules if info.ispkg]
-        search_locations = set(chain.from_iterable(
-            getattr(spec, 'submodule_search_locations', [])
+        search_locations = {
+            *getattr(spec, 'submodule_search_locations', [])
             for spec in specs if spec
-        ))
+        }
         return pkgutil.iter_modules(search_locations)
 
     def get_path_and_prefix(self, dotted_name: str) -> tuple[str, str]:
