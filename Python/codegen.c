@@ -4521,7 +4521,6 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
             break;
         case COMP_DICTCOMP:
             if (val == NULL){
-                // dict unpacking case
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
             }
@@ -4620,8 +4619,9 @@ codegen_async_comprehension_generator(compiler *c, location loc,
         switch (type) {
         case COMP_GENEXP:
             if (elt->kind == Starred_kind){
-                // ADD_YIELD_FROM won't work here so we need an explicit loop
-                // this block is loosely based on codegen_for
+                /* ADD_YIELD_FROM won't work here like it does in the
+                synchronous case, so use an explicit loop to mimic the
+                bytecode for (z async for y in x for z in y). */
                 NEW_JUMP_TARGET_LABEL(c, async_unpack_start);
                 NEW_JUMP_TARGET_LABEL(c, async_unpack_end);
                 VISIT(c, expr, elt->v.Starred.value);
@@ -4663,7 +4663,6 @@ codegen_async_comprehension_generator(compiler *c, location loc,
             break;
         case COMP_DICTCOMP:
             if (val == NULL){
-                // dict unpacking case
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
             }
