@@ -705,9 +705,12 @@ expressions[expr_ty]:
 expression[expr_ty] (memo):
     | invalid_expression
     | invalid_legacy_expression
-    | a=disjunction 'if' b=disjunction 'else' c=expression { _PyAST_IfExp(b, a, c, EXTRA) }
+    | if_expression
     | disjunction
     | lambdef
+
+if_expression[expr_ty]:
+    | a=disjunction 'if' b=disjunction 'else' c=expression { _PyAST_IfExp(b, a, c, EXTRA) }
 
 yield_expr[expr_ty]:
     | 'yield' 'from' a=expression { _PyAST_YieldFrom(a, EXTRA) }
@@ -726,8 +729,15 @@ star_expression[expr_ty] (memo):
 star_named_expressions[asdl_expr_seq*]: a[asdl_expr_seq*]=','.star_named_expression+ [','] { a }
 
 star_named_expression[expr_ty]:
+    | invalid_starred_expression_unpacking
     | '*' a=bitwise_or { _PyAST_Starred(a, Load, EXTRA) }
     | named_expression
+
+star_named_expressions_listset[asdl_expr_seq*]: a[asdl_expr_seq*]=','.star_named_expression_listset+ [','] { a }
+
+star_named_expression_listset[expr_ty]:
+    | invalid_starred_expression_unpacking_listset
+    | star_named_expression
 
 assignment_expression[expr_ty]:
     | a=NAME ':=' ~ b=expression {
@@ -877,8 +887,8 @@ atom[expr_ty]:
     | &(STRING|FSTRING_START|TSTRING_START) strings
     | NUMBER
     | &'(' (tuple | group | genexp)
-    | &'[' (list | listcomp)
-    | &'{' (dict | set | dictcomp | setcomp)
+    | &'[' (listcomp | list)
+    | &'{' (dictcomp | setcomp | dict | set)
     | '...' { _PyAST_Constant(Py_Ellipsis, NULL, EXTRA) }
 
 group[expr_ty]:
@@ -989,13 +999,13 @@ string[expr_ty]: s[Token*]=STRING { _PyPegen_constant_from_string(p, s) }
 strings[expr_ty] (memo): a[asdl_expr_seq*]=(fstring|string|tstring)+ { _PyPegen_concatenate_strings(p, a, EXTRA) }
 
 list[expr_ty]:
-    | '[' a=[star_named_expressions] ']' { _PyAST_List(a, Load, EXTRA) }
+    | '[' a=[star_named_expressions_listset] ']' { _PyAST_List(a, Load, EXTRA) }
 
 tuple[expr_ty]:
-    | '(' a=[y=star_named_expression ',' z=[star_named_expressions] { _PyPegen_seq_insert_in_front(p, y, z) } ] ')' {
+    | '(' a=[y=star_named_expression_listset ',' z=[star_named_expressions_listset] { _PyPegen_seq_insert_in_front(p, y, z) } ] ')' {
         _PyAST_Tuple(a, Load, EXTRA) }
 
-set[expr_ty]: '{' a=star_named_expressions '}' { _PyAST_Set(a, EXTRA) }
+set[expr_ty]: '{' a=star_named_expressions_listset '}' { _PyAST_Set(a, EXTRA) }
 
 # Dicts
 # -----
@@ -1045,6 +1055,7 @@ genexp[expr_ty]:
 dictcomp[expr_ty]:
     | '{' a=kvpair b=for_if_clauses '}' { _PyAST_DictComp(a->key, a->value, b, EXTRA) }
     | '{' '**' a=bitwise_or b=for_if_clauses '}' { _PyAST_DictComp(a, NULL, b, EXTRA) }
+    | invalid_dictcomp
 
 # FUNCTION CALL ARGUMENTS
 # =======================
@@ -1245,6 +1256,10 @@ invalid_expression:
         _PyPegen_check_legacy_stmt(p, a) ? NULL : p->tokens[p->mark-1]->level == 0 ? NULL :
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid syntax. Perhaps you forgot a comma?") }
    | a=disjunction 'if' b=disjunction !('else'|':') { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "expected 'else' after 'if' expression") }
+   | disjunction 'if' b=disjunction 'else' a='*' {
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use unpacking operator on part of a conditional expression") }
+   | disjunction 'if' b=disjunction 'else' a='**' {
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use dict unpacking operator on part of a conditional expression") }
    | a=disjunction 'if' b=disjunction 'else' !expression {
         RAISE_SYNTAX_ERROR_ON_NEXT_TOKEN("expected expression after 'else', but statement is given") }
    | a[stmt_ty]=(pass_stmt|break_stmt|continue_stmt) 'if' b=disjunction 'else' c=simple_stmt {
@@ -1299,15 +1314,18 @@ invalid_del_stmt:
 invalid_block:
     | NEWLINE !INDENT { RAISE_INDENTATION_ERROR("expected an indented block") }
 invalid_comprehension:
-    | '[' a='**' b=expression for_if_clauses {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "dict unpacking cannot be used in list comprehension") }
-    | '(' a='**' b=expression for_if_clauses {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "dict unpacking cannot be used in generator expression") }
+    | '[' a='**' bitwise_or for_if_clauses {
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "dict unpacking cannot be used in list comprehension") }
+    | '(' a='**' bitwise_or for_if_clauses {
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "dict unpacking cannot be used in generator expression") }
     | ('[' | '{') a=star_named_expression ',' b=star_named_expressions for_if_clauses {
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, PyPegen_last_item(b, expr_ty),
         "did you forget parentheses around the comprehension target?") }
     | ('[' | '{') a=star_named_expression b=',' for_if_clauses {
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "did you forget parentheses around the comprehension target?") }
+invalid_dictcomp:
+    | '{' a='**' b=if_expression for_if_clauses {
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot unpack conditional expression in dict comprehension") }
 invalid_parameters:
     | a="/" ',' {
         RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "at least one parameter must precede /") }
@@ -1495,6 +1513,8 @@ invalid_class_def_raw:
 
 invalid_double_starred_kvpairs:
     | ','.double_starred_kvpair+ ',' invalid_kvpair
+    | a='**' b=if_expression {
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking operator here.  did you forget to wrap the conditional expression in parentheses?") }
     | a='*' b=bitwise_or ':' expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use a starred expression in a dictionary key") }
     | a='**' b=bitwise_or ':' expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking in a dictionary key") }
     | expression ':' a='*' b=bitwise_or { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use a starred expression in a dictionary value") }
@@ -1505,7 +1525,12 @@ invalid_kvpair:
         RAISE_ERROR_KNOWN_LOCATION(p, PyExc_SyntaxError, a->lineno, a->end_col_offset - 1, a->end_lineno, -1, "':' expected after dictionary key") }
     | expression ':' a='*' bitwise_or { RAISE_SYNTAX_ERROR_STARTING_FROM(a, "cannot use a starred expression in a dictionary value") }
     | expression a=':' &('}'|',') {RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "expression expected after dictionary key and ':'") }
+invalid_starred_expression_unpacking_listset:
+    | a='**' bitwise_or {
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use dict unpacking here") }
 invalid_starred_expression_unpacking:
+    | a='*' b=if_expression {
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use unpacking operator here.  did you forget to wrap the conditional expression in parentheses?") }
     | a='*' expression '=' b=expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot assign to iterable argument unpacking") }
 invalid_starred_expression:
     | '*' { RAISE_SYNTAX_ERROR("Invalid star expression") }
