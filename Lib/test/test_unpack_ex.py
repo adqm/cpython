@@ -213,6 +213,14 @@ Scoping of starred comprehension targets
     >>> z
     [1, 2, 3]
 
+    >>> x = [1, 2, 3]
+    >>> y = [4, 5, 6]
+    >>> def f(*args):
+    ...     print(args)
+
+    >>> f(*x if x else y)
+    (1, 2, 3)
+
 
 Malformed comperehension element unpacking
 
@@ -222,12 +230,64 @@ Malformed comperehension element unpacking
     [*x for x in [1, 2, 3]]
      ^^
     TypeError: Value after * must be an iterable, not int
+
+
+Error messages for specific failure modes of unpacking
+
+    >>> [*x if x else y for x in z]
+    Traceback (most recent call last):
+    ...
+    [*x if x else y for x in z]
+     ^^^^^^^^^^^^^^
+    SyntaxError: cannot use unpacking operator here.  did you forget to wrap the conditional expression in parentheses?
+
+    >>> [*x if x else y]
+    Traceback (most recent call last):
+    ...
+    [*x if x else y]
+     ^^^^^^^^^^^^^^
+    SyntaxError: cannot use unpacking operator here.  did you forget to wrap the conditional expression in parentheses?
+
+    >>> [x if x else *y for x in z]
+    Traceback (most recent call last):
+    ...
+    [x if x else *y for x in z]
+                 ^
+    SyntaxError: cannot use unpacking operator on part of a conditional expression
+
+    >>> [x if x else *y]
+    Traceback (most recent call last):
+    ...
+    [x if x else *y]
+                 ^
+    SyntaxError: cannot use unpacking operator on part of a conditional expression
+
+    >>> {**x if x else y}
+    Traceback (most recent call last):
+    ...
+    {**x if x else y}
+     ^^^^^^^^^^^^^^^^
+    SyntaxError: cannot use dict unpacking operator here.  did you forget to wrap the conditional expression in parentheses?
+    >>> {x if x else **y}
+    Traceback (most recent call last):
+    ...
+    {x if x else **y}
+                 ^^
+    SyntaxError: cannot use dict unpacking operator on part of a conditional expression
+
     >>> [**x for x in [{1: 2}]]
     Traceback (most recent call last):
     ...
     [**x for x in [{1: 2}]]
      ^^^
     SyntaxError: dict unpacking cannot be used in list comprehension
+
+    >>> dict(**x for x in [{1:2}])
+    Traceback (most recent call last):
+    ...
+        dict(**x for x in [{1:2}])
+             ^^^
+    SyntaxError: dict unpacking cannot be used in generator expression
 
     >>> {*a: b for a, b in {1: 2}.items()}
     Traceback (most recent call last):
@@ -268,13 +328,6 @@ Malformed comperehension element unpacking
     ...     print(type(arg), list(arg), list(arg))
     >>> f(*x for x in [[1,2,3]])
     <class 'generator'> [1, 2, 3] []
-
-    >>> dict(**x for x in [{1:2}])
-    Traceback (most recent call last):
-    ...
-        dict(**x for x in [{1:2}])
-             ^^^
-    SyntaxError: dict unpacking cannot be used in generator expression
 
 Iterable argument unpacking
 
