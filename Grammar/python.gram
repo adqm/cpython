@@ -1055,7 +1055,6 @@ genexp[expr_ty]:
 dictcomp[expr_ty]:
     | '{' a=kvpair b=for_if_clauses '}' { _PyAST_DictComp(a->key, a->value, b, EXTRA) }
     | '{' '**' a=bitwise_or b=for_if_clauses '}' { _PyAST_DictComp(a, NULL, b, EXTRA) }
-    | invalid_dictcomp
 
 # FUNCTION CALL ARGUMENTS
 # =======================
@@ -1323,9 +1322,6 @@ invalid_comprehension:
         "did you forget parentheses around the comprehension target?") }
     | ('[' | '{') a=star_named_expression b=',' for_if_clauses {
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "did you forget parentheses around the comprehension target?") }
-invalid_dictcomp:
-    | '{' a='**' b=if_expression for_if_clauses {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot unpack conditional expression in dict comprehension") }
 invalid_parameters:
     | a="/" ',' {
         RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "at least one parameter must precede /") }
