@@ -15095,7 +15095,7 @@ slice_rule(Parser *p)
 //     | 'None'
 //     | &(STRING | FSTRING_START | TSTRING_START) strings
 //     | NUMBER
-//     | &'(' (tuple | group | genexp)
+//     | &'(' (genexp | tuple | group)
 //     | &'[' (listcomp | list)
 //     | &'{' (dictcomp | setcomp | dict | set)
 //     | '...'
@@ -15278,26 +15278,26 @@ atom_rule(Parser *p)
         D(fprintf(stderr, "%*c%s atom[%d-%d]: %s failed!\n", p->level, ' ',
                   p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "NUMBER"));
     }
-    { // &'(' (tuple | group | genexp)
+    { // &'(' (genexp | tuple | group)
         if (p->error_indicator) {
             p->level--;
             return NULL;
         }
-        D(fprintf(stderr, "%*c> atom[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "&'(' (tuple | group | genexp)"));
+        D(fprintf(stderr, "%*c> atom[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "&'(' (genexp | tuple | group)"));
         void *_tmp_69_var;
         if (
             _PyPegen_lookahead_with_int(1, _PyPegen_expect_token, p, 7)  // token='('
             &&
-            (_tmp_69_var = _tmp_69_rule(p))  // tuple | group | genexp
+            (_tmp_69_var = _tmp_69_rule(p))  // genexp | tuple | group
         )
         {
-            D(fprintf(stderr, "%*c+ atom[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "&'(' (tuple | group | genexp)"));
+            D(fprintf(stderr, "%*c+ atom[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "&'(' (genexp | tuple | group)"));
             _res = _tmp_69_var;
             goto done;
         }
         p->mark = _mark;
         D(fprintf(stderr, "%*c%s atom[%d-%d]: %s failed!\n", p->level, ' ',
-                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "&'(' (tuple | group | genexp)"));
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "&'(' (genexp | tuple | group)"));
     }
     { // &'[' (listcomp | list)
         if (p->error_indicator) {
@@ -31884,7 +31884,7 @@ _tmp_68_rule(Parser *p)
     return _res;
 }
 
-// _tmp_69: tuple | group | genexp
+// _tmp_69: genexp | tuple | group
 static void *
 _tmp_69_rule(Parser *p)
 {
@@ -31897,6 +31897,25 @@ _tmp_69_rule(Parser *p)
     }
     void * _res = NULL;
     int _mark = p->mark;
+    { // genexp
+        if (p->error_indicator) {
+            p->level--;
+            return NULL;
+        }
+        D(fprintf(stderr, "%*c> _tmp_69[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "genexp"));
+        expr_ty genexp_var;
+        if (
+            (genexp_var = genexp_rule(p))  // genexp
+        )
+        {
+            D(fprintf(stderr, "%*c+ _tmp_69[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "genexp"));
+            _res = genexp_var;
+            goto done;
+        }
+        p->mark = _mark;
+        D(fprintf(stderr, "%*c%s _tmp_69[%d-%d]: %s failed!\n", p->level, ' ',
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "genexp"));
+    }
     { // tuple
         if (p->error_indicator) {
             p->level--;
@@ -31934,25 +31953,6 @@ _tmp_69_rule(Parser *p)
         p->mark = _mark;
         D(fprintf(stderr, "%*c%s _tmp_69[%d-%d]: %s failed!\n", p->level, ' ',
                   p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "group"));
-    }
-    { // genexp
-        if (p->error_indicator) {
-            p->level--;
-            return NULL;
-        }
-        D(fprintf(stderr, "%*c> _tmp_69[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "genexp"));
-        expr_ty genexp_var;
-        if (
-            (genexp_var = genexp_rule(p))  // genexp
-        )
-        {
-            D(fprintf(stderr, "%*c+ _tmp_69[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "genexp"));
-            _res = genexp_var;
-            goto done;
-        }
-        p->mark = _mark;
-        D(fprintf(stderr, "%*c%s _tmp_69[%d-%d]: %s failed!\n", p->level, ' ',
-                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "genexp"));
     }
     _res = NULL;
   done:
