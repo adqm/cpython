@@ -1256,9 +1256,9 @@ invalid_expression:
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid syntax. Perhaps you forgot a comma?") }
    | a=disjunction 'if' b=disjunction !('else'|':') { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "expected 'else' after 'if' expression") }
    | disjunction 'if' b=disjunction 'else' a='*' {
-        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use unpacking operator on part of a conditional expression") }
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot unpack only part of a conditional expression") }
    | disjunction 'if' b=disjunction 'else' a='**' {
-        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use dict unpacking operator on part of a conditional expression") }
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use dict unpacking on only part of a conditional expression") }
    | a=disjunction 'if' b=disjunction 'else' !expression {
         RAISE_SYNTAX_ERROR_ON_NEXT_TOKEN("expected expression after 'else', but statement is given") }
    | a[stmt_ty]=(pass_stmt|break_stmt|continue_stmt) 'if' b=disjunction 'else' c=simple_stmt {
@@ -1314,9 +1314,9 @@ invalid_block:
     | NEWLINE !INDENT { RAISE_INDENTATION_ERROR("expected an indented block") }
 invalid_comprehension:
     | '[' a='**' bitwise_or for_if_clauses {
-        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "dict unpacking cannot be used in list comprehension") }
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use dict unpacking in list comprehension") }
     | '(' a='**' bitwise_or for_if_clauses {
-        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "dict unpacking cannot be used in generator expression") }
+        RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use dict unpacking in generator expression") }
     | ('[' | '{') a=star_named_expression ',' b=star_named_expressions for_if_clauses {
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, PyPegen_last_item(b, expr_ty),
         "did you forget parentheses around the comprehension target?") }
@@ -1508,25 +1508,26 @@ invalid_class_def_raw:
         RAISE_INDENTATION_ERROR("expected an indented block after class definition on line %d", a->lineno) }
 
 invalid_double_starred_kvpairs:
-    | ','.double_starred_kvpair+ ',' invalid_kvpair
+    | invalid_kvpair_unpacking [',']
+    | ','.double_starred_kvpair+ ',' (invalid_kvpair | invalid_kvpair_unpacking)
     | a='**' b=if_expression {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking operator here.  did you forget to wrap the conditional expression in parentheses?") }
-    | a='*' b=bitwise_or ':' expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use a starred expression in a dictionary key") }
-    | a='**' b=bitwise_or ':' expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking in a dictionary key") }
-    | expression ':' a='*' b=bitwise_or { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use a starred expression in a dictionary value") }
-    | expression ':' a='**' b=bitwise_or { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking in a dictionary value") }
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid double starred expression.  did you forget to wrap the conditional expression in parentheses?") }
     | expression a=':' &('}'|',') { RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "expression expected after dictionary key and ':'") }
 invalid_kvpair:
     | a=expression !(':') {
         RAISE_ERROR_KNOWN_LOCATION(p, PyExc_SyntaxError, a->lineno, a->end_col_offset - 1, a->end_lineno, -1, "':' expected after dictionary key") }
-    | expression ':' a='*' bitwise_or { RAISE_SYNTAX_ERROR_STARTING_FROM(a, "cannot use a starred expression in a dictionary value") }
     | expression a=':' &('}'|',') {RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "expression expected after dictionary key and ':'") }
+invalid_kvpair_unpacking:
+    | a='*' b=bitwise_or ':' expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use a starred expression in a dictionary key") }
+    | a='**' b=bitwise_or ':' expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking in a dictionary key") }
+    | expression ':' a='*' b=bitwise_or { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use a starred expression in a dictionary value") }
+    | expression ':' a='**' b=bitwise_or { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use dict unpacking in a dictionary value") }
 invalid_starred_expression_unpacking_listset:
     | a='**' bitwise_or {
         RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use dict unpacking here") }
 invalid_starred_expression_unpacking:
     | a='*' b=if_expression {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot use unpacking operator here.  did you forget to wrap the conditional expression in parentheses?") }
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid starred expression.  did you forget to wrap the conditional expression in parentheses?") }
     | a='*' expression '=' b=expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot assign to iterable argument unpacking") }
 invalid_starred_expression:
     | '*' { RAISE_SYNTAX_ERROR("Invalid star expression") }
