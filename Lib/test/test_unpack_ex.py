@@ -282,6 +282,13 @@ Error messages for specific failure modes of unpacking
      ^^^
     SyntaxError: dict unpacking cannot be used in list comprehension
 
+    >>> (**x for x in [{1:2}])
+    Traceback (most recent call last):
+    ...
+        (**x for x in [{1:2}])
+         ^^^
+    SyntaxError: dict unpacking cannot be used in generator expression
+
     >>> dict(**x for x in [{1:2}])
     Traceback (most recent call last):
     ...
