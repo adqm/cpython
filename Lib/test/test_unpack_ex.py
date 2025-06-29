@@ -239,62 +239,62 @@ Error messages for specific failure modes of unpacking
     ...
     [*x if x else y for x in z]
      ^^^^^^^^^^^^^^
-    SyntaxError: cannot use unpacking operator here.  did you forget to wrap the conditional expression in parentheses?
+    SyntaxError: invalid starred expression.  did you forget to wrap the conditional expression in parentheses?
 
     >>> [*x if x else y]
     Traceback (most recent call last):
     ...
     [*x if x else y]
      ^^^^^^^^^^^^^^
-    SyntaxError: cannot use unpacking operator here.  did you forget to wrap the conditional expression in parentheses?
+    SyntaxError: invalid starred expression.  did you forget to wrap the conditional expression in parentheses?
 
     >>> [x if x else *y for x in z]
     Traceback (most recent call last):
     ...
     [x if x else *y for x in z]
                  ^
-    SyntaxError: cannot use unpacking operator on part of a conditional expression
+    SyntaxError: cannot unpack only part of a conditional expression
 
     >>> [x if x else *y]
     Traceback (most recent call last):
     ...
     [x if x else *y]
                  ^
-    SyntaxError: cannot use unpacking operator on part of a conditional expression
+    SyntaxError: cannot unpack only part of a conditional expression
 
     >>> {**x if x else y}
     Traceback (most recent call last):
     ...
     {**x if x else y}
      ^^^^^^^^^^^^^^^^
-    SyntaxError: cannot use dict unpacking operator here.  did you forget to wrap the conditional expression in parentheses?
+    SyntaxError: invalid double starred expression.  did you forget to wrap the conditional expression in parentheses?
     >>> {x if x else **y}
     Traceback (most recent call last):
     ...
     {x if x else **y}
                  ^^
-    SyntaxError: cannot use dict unpacking operator on part of a conditional expression
+    SyntaxError: cannot use dict unpacking on only part of a conditional expression
 
     >>> [**x for x in [{1: 2}]]
     Traceback (most recent call last):
     ...
     [**x for x in [{1: 2}]]
      ^^^
-    SyntaxError: dict unpacking cannot be used in list comprehension
+    SyntaxError: cannot use dict unpacking in list comprehension
 
     >>> (**x for x in [{1:2}])
     Traceback (most recent call last):
     ...
         (**x for x in [{1:2}])
          ^^^
-    SyntaxError: dict unpacking cannot be used in generator expression
+    SyntaxError: cannot use dict unpacking in generator expression
 
     >>> dict(**x for x in [{1:2}])
     Traceback (most recent call last):
     ...
         dict(**x for x in [{1:2}])
              ^^^
-    SyntaxError: dict unpacking cannot be used in generator expression
+    SyntaxError: cannot use dict unpacking in generator expression
 
     >>> {*a: b for a, b in {1: 2}.items()}
     Traceback (most recent call last):
