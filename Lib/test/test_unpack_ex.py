@@ -179,7 +179,22 @@ Comprehension element unpacking
     >>> list(gen)
     [1, 0, 1, 0, 1, 0, 1, 0, 1]
 
-Scoping of starred comprehension targets
+Comprehension unpacking with conditionals and double loops
+
+    >>> [*[i, i+1] for i in range(5) if i % 2 == 0]
+    [0, 1, 2, 3, 4, 5]
+
+    >>> [*y for x in [[[0], [1, 2, 3], [], [4, 5]], [[6, 7]]] for y in x]
+    [0, 1, 2, 3, 4, 5, 6, 7]
+
+    >>> [*y for x in [[[0], [1, 2, 3], [], [4, 5]], [[6, 7]]] for y in x if y and y[0]>0]
+    [1, 2, 3, 4, 5, 6, 7]
+
+    >>> dicts = [{1: 2}, {3: 4}, {5: 6, 7: 8}, {}, {9: 10}, {1: 0}]
+    >>> {**d for d in dicts if len(d) != 2}
+    {1: 0, 3: 4, 9: 10}
+
+Scoping of assignment expressions in comprehensions
 
     >>> [*((y := i**2), 2*y) for i in range(4)]
     [0, 0, 1, 2, 4, 8, 9, 18]
