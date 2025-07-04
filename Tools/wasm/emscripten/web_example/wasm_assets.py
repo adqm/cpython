@@ -76,7 +76,6 @@ OMIT_NETWORKING_FILES = (
 
 OMIT_MODULE_FILES = {
     "_asyncio": ["asyncio/"],
-    "_curses": ["curses/"],
     "_ctypes": ["ctypes/"],
     "_decimal": ["decimal.py"],
     "_dbm": ["dbm/ndbm.py"],
@@ -84,7 +83,6 @@ OMIT_MODULE_FILES = {
     "_json": ["json/"],
     "_multiprocessing": ["concurrent/futures/process.py", "multiprocessing/"],
     "pyexpat": ["xml/", "xmlrpc/"],
-    "readline": ["rlcompleter.py"],
     "_sqlite3": ["sqlite3/"],
     "_ssl": ["ssl.py"],
     "_tkinter": ["idlelib/", "tkinter/", "turtle.py", "turtledemo/"],

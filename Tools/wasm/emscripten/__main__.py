@@ -226,6 +226,7 @@ def configure_emscripten_python(context, working_dir):
         "--disable-ipv6",
         "--enable-big-digits=30",
         "--enable-wasm-dynamic-linking",
+        "--enable-wasm-pthreads",
         f"--prefix={PREFIX_DIR}",
     ]
     if pydebug:

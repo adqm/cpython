@@ -2337,6 +2337,7 @@ AS_CASE([$ac_sys_system],
     AS_VAR_APPEND([LINKFORSHARED], [" -sEXPORTED_RUNTIME_METHODS=FS,callMain,ENV,HEAPU32"])
     AS_VAR_APPEND([LINKFORSHARED], [" -sEXPORTED_FUNCTIONS=_main,_Py_Version,__PyRuntime,__PyEM_EMSCRIPTEN_COUNT_ARGS_OFFSET,_PyGILState_GetThisThreadState,__Py_DumpTraceback"])
     AS_VAR_APPEND([LINKFORSHARED], [" -sSTACK_SIZE=5MB"])
+    AS_VAR_APPEND([LINKFORSHARED], [" --js-library=../../../../Tools/wasm/emscripten/libraries/emscripten-pty.js"])
 
     AS_VAR_IF([enable_wasm_dynamic_linking], [yes], [
       AS_VAR_APPEND([LINKFORSHARED], [" -sMAIN_MODULE"])
@@ -7746,8 +7747,6 @@ AS_CASE([$ac_sys_system],
     dnl dbm and gdbm aren't available, too.
     dnl pwd, grp APIs, and resource functions (get/setrusage) are stubs.
     PY_STDLIB_MOD_SET_NA(
-      [_curses],
-      [_curses_panel],
       [_dbm],
       [_gdbm],
       [_multiprocessing],
@@ -7762,12 +7761,6 @@ AS_CASE([$ac_sys_system],
       [pwd],
       [resource],
       [syslog],
-    )
-    dnl fcntl, readline, and termios are not particularly useful in browsers.
-    PY_STDLIB_MOD_SET_NA(
-      [fcntl],
-      [readline],
-      [termios],
     )
   ],
   [WASI], [
