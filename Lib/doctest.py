@@ -97,6 +97,7 @@ import difflib
 import inspect
 import linecache
 import os
+import ast
 import pdb
 import re
 import sys
@@ -198,6 +199,95 @@ ELLIPSIS_MARKER = '...'
 ######################################################################
 ## 1. Utility Functions
 ######################################################################
+
+def _ast_docstring_info(mod):
+    """
+    Given a module, attempt to build a corresponding AST and extract
+    information from it thatcould be relevant to doctests
+    """
+    if not inspect.ismodule(mod):
+        return None
+
+    try:
+        source = inspect.getsource(mod)
+        tree = ast.parse(source)
+    except:
+        # i think i really _do_ want a bare except here even though it feels
+        # kinda wrong
+        return None
+
+    def _get_docstring(node):
+        # return the AST node corresponding to the given node's docstring (if
+        # any)
+        if (
+            isinstance(
+                node, (ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef, ast.Module)
+            )
+            and node.body
+            and isinstance((firstexp := node.body[0]), ast.Expr)
+            and isinstance((firstvalue := firstexp.value), ast.Constant)
+            and isinstance(firstvalue.value, str)
+        ):
+            return firstvalue
+        return None
+
+    class ASTWalker(ast.NodeVisitor):
+        _name_map = {
+            "FunctionDef": "function",
+            "AsyncFunctionDef": "function",
+            "ClassDef": "class",
+        }
+
+        def __init__(self):
+            self.stack = []
+            self.inspectable_nodes = {}
+
+        def visit_FunctionDef(self, node):
+            key = (self._name_map[node.__class__.__name__], node.name, node.lineno)
+            value = (_get_docstring(node), (descendents := []))
+            if self.stack:
+                self.stack[-1].append(key)
+            self.inspectable_nodes[key] = value
+            self.stack.append(descendents)
+            self.generic_visit(node)
+            self.stack.pop()
+
+        visit_AsyncFunctionDef = visit_FunctionDef
+        visit_ClassDef = visit_FunctionDef
+
+        def visit_Module(self, node):
+            key = ("module", None, 0)
+            value = (_get_docstring(node), (descendents := []))
+            self.inspectable_nodes[key] = value
+            self.stack.append(descendents)
+            self.generic_visit(node)
+            self.stack.pop()
+
+    (visitor := ASTWalker()).visit(tree)
+    return visitor.inspectable_nodes
+
+def _ast_docstring_from_object(ast_info, obj):
+    if inspect.isclass(obj):
+        _key = 'class', obj.__name__, obj.__firstlineno__
+    elif inspect.isfunction(obj):
+        _key = 'function', obj.__name__, obj.__code__.co_firstlineno
+    elif inspect.iscode(obj):
+        _key = 'function', obj.co_name, obj.co_firstlineno
+    else:
+        return None
+    return ast_info.get(_key, (None, None))[0]
+
+def _ast_docstring_lineno(ast_info, obj, docstring):
+    try:
+        ast_docstring = _ast_docstring_from_object(ast_info, obj)
+        if inspect.cleandoc(ast_docstring.value) == inspect.cleandoc(docstring):
+            # only return this if the docstring wasn't modified at
+            # runtime
+            return ast_docstring.lineno - 1
+        else:
+            return None
+    except:
+        return None
 
 def _extract_future_flags(globs):
     """
@@ -949,6 +1039,9 @@ class DocTestFinder:
                 if not source_lines:
                     source_lines = None
 
+        # grab information about relevant tests from the AST
+        ast_info = _ast_docstring_info(module)
+
         # Initialize globals, and merge in extraglobs.
         if globs is None:
             if module is None:
@@ -964,7 +1057,7 @@ class DocTestFinder:
 
         # Recursively explore `obj`, extracting DocTests.
         tests = []
-        self._find(tests, obj, name, module, source_lines, globs, {})
+        self._find(tests, obj, name, module, source_lines, ast_info, globs, {})
         # Sort the tests by alpha order of names, for consistency in
         # verbose-mode output.  This was a feature of doctest in Pythons
         # <= 2.3 that got lost by accident in 2.4.  It was repaired in
@@ -1012,7 +1105,7 @@ class DocTestFinder:
             pass
         return inspect.isroutine(maybe_routine)
 
-    def _find(self, tests, obj, name, module, source_lines, globs, seen):
+    def _find(self, tests, obj, name, module, source_lines, ast_info, globs, seen):
         """
         Find tests for the given object and any contained objects, and
         add them to `tests`.
@@ -1026,7 +1119,7 @@ class DocTestFinder:
         seen[id(obj)] = 1
 
         # Find a test for this object, and add it to the list of tests.
-        test = self._get_test(obj, name, module, globs, source_lines)
+        test = self._get_test(obj, name, module, globs, source_lines, ast_info)
         if test is not None:
             tests.append(test)
 
@@ -1038,7 +1131,7 @@ class DocTestFinder:
                 # Recurse to functions & classes.
                 if ((self._is_routine(val) or inspect.isclass(val)) and
                     self._from_module(module, val)):
-                    self._find(tests, val, valname, module, source_lines,
+                    self._find(tests, val, valname, module, source_lines, ast_info,
                                globs, seen)
 
         # Look for tests in a module's __test__ dictionary.
@@ -1055,7 +1148,7 @@ class DocTestFinder:
                                      "classes, or modules: %r" %
                                      (type(val),))
                 valname = '%s.__test__.%s' % (name, valname)
-                self._find(tests, val, valname, module, source_lines,
+                self._find(tests, val, valname, module, source_lines, ast_info,
                            globs, seen)
 
         # Look for tests in a class's contained objects.
@@ -1070,10 +1163,10 @@ class DocTestFinder:
                       isinstance(val, property)) and
                       self._from_module(module, val)):
                     valname = '%s.%s' % (name, valname)
-                    self._find(tests, val, valname, module, source_lines,
+                    self._find(tests, val, valname, module, source_lines, ast_info,
                                globs, seen)
 
-    def _get_test(self, obj, name, module, globs, source_lines):
+    def _get_test(self, obj, name, module, globs, source_lines, ast_info):
         """
         Return a DocTest for the given object, if it defines a docstring;
         otherwise, return None.
@@ -1094,7 +1187,7 @@ class DocTestFinder:
                 docstring = ''
 
         # Find the docstring's location in the file.
-        lineno = self._find_lineno(obj, source_lines)
+        lineno = self._find_lineno(obj, source_lines, ast_info)
 
         # Don't bother if the docstring is empty.
         if self._exclude_empty and not docstring:
@@ -1111,7 +1204,7 @@ class DocTestFinder:
         return self._parser.get_doctest(docstring, globs, name,
                                         filename, lineno)
 
-    def _find_lineno(self, obj, source_lines):
+    def _find_lineno(self, obj, source_lines, ast_info):
         """
         Return a line number of the given object's docstring.
 
@@ -1125,9 +1218,11 @@ class DocTestFinder:
             lineno = 0
 
         # Find the line number for classes.
-        # Note: this could be fooled if a class is defined multiple
-        # times in a single file.
         if inspect.isclass(obj) and docstring is not None:
+            # try using AST to parse things out
+            if (ast_lineno := _ast_docstring_lineno(ast_info, obj, docstring)) is not None:
+                return ast_lineno
+            # fall back to source_lines
             if source_lines is None:
                 return None
             pat = re.compile(r'^\s*class\s*%s\b' %
@@ -1144,6 +1239,8 @@ class DocTestFinder:
         if inspect.isfunction(obj) and getattr(obj, '__doc__', None):
             # We don't use `docstring` var here, because `obj` can be changed.
             obj = inspect.unwrap(obj)
+            if (ast_lineno := _ast_docstring_lineno(ast_info, obj, docstring)) is not None:
+                return ast_lineno
             try:
                 obj = obj.__code__
             except AttributeError:
@@ -1151,8 +1248,13 @@ class DocTestFinder:
                 # have a __code__ attribute.
                 # If there's no code, there's no lineno
                 return None
+        if (ast_lineno := _ast_docstring_lineno(ast_info, obj, docstring)) is not None:
+            return ast_lineno
         if inspect.istraceback(obj): obj = obj.tb_frame
-        if inspect.isframe(obj): obj = obj.f_code
+        if inspect.isframe(obj):
+            obj = obj.f_code
+            if (ast_lineno := _ast_docstring_lineno(ast_info, obj, docstring)) is not None:
+                return ast_lineno
         if inspect.iscode(obj):
             lineno = obj.co_firstlineno - 1
 
