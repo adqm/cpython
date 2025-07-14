@@ -212,7 +212,7 @@ loops that truncate the stream.
 
       Since version 3.15, the following is also roughly equivalent::
 
-         def chain(iterables):
+         def chain(*iterables):
              return (*iterable for iterable in iterables)
 
 
