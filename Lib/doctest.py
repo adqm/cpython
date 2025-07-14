@@ -1124,6 +1124,26 @@ class DocTestFinder:
             return
         seen.add(id(obj))
 
+        # Handle all parts of properties
+        if isinstance(obj, property) and self._recurse:
+            subparts = ['fget', 'fset', 'fdel']
+            if obj.__doc__ == obj.fget.__doc__:
+                # don't recurse on fget if it has the same docstring as the
+                # property itself (since the property's docstring might have
+                # been grabbed from the getter)
+                subparts.pop(0)
+            for subpart in subparts:
+                func = getattr(obj, subpart, None)
+                if func is not None:
+                    valname = '%s.%s' % (name, subpart)
+                    self._find(tests, func, valname, module, source_lines,
+                               globs, seen)
+            if obj.__doc__ == obj.fget.__doc__ and id(obj.fget) in seen:
+                # don't bother with this test if we've already looked at the
+                # getter unless their docstrings are different (to avoid
+                # redundant tests from sharing a docstring)
+                return
+
         # Find a test for this object, and add it to the list of tests.
         test = self._get_test(obj, name, module, globs, source_lines, ast_info)
         if test is not None:
