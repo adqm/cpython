@@ -1835,6 +1835,102 @@ class AsyncGenAsyncioTest(unittest.TestCase):
         res = self.loop.run_until_complete(run())
         self.assertEqual(res, [i * 2 for i in range(1, 10)])
 
+    def test_async_gen_expression_unpacking_tuple_01(self):
+        async def test_gen():
+            for i in range(5):
+                await asyncio.sleep(0.001)
+                yield i
+
+        async def run():
+            return [*(4, 2) async for i in test_gen()]
+
+        res = self.loop.run_until_complete(run())
+        self.assertEqual(res, [4, 2] * 5)
+
+    def test_async_gen_expression_unpacking_tuple_02(self):
+        async def test_gen():
+            for i in range(5):
+                await asyncio.sleep(0.001)
+                yield i, i**2
+
+        async def run():
+            return [*i async for i in test_gen()]
+
+        res = self.loop.run_until_complete(run())
+        self.assertEqual(res, [0, 0, 1, 1, 2, 4, 3, 9, 4, 16])
+
+    def test_async_gen_expression_unpacking_dict(self):
+        async def test_gen():
+            for i in range(5):
+                await asyncio.sleep(0.001)
+                yield {i: i**2}
+
+        async def run():
+            return {**i async for i in test_gen()}
+
+        res = self.loop.run_until_complete(run())
+        self.assertEqual(res, {i: i**2 for i in range(5)})
+
+    def test_async_gen_expression_unpacking_genexp_01(self):
+        async def test_gen():
+            for i in range(5):
+                await asyncio.sleep(0.001)
+                yield i, i**2
+
+        async def run():
+            out = []
+            async for item in (*i async for i in test_gen()):
+                out.append(item)
+            return out
+
+        res = self.loop.run_until_complete(run())
+        self.assertEqual(res, [0, 0, 1, 1, 2, 4, 3, 9, 4, 16])
+
+    def test_async_gen_expression_unpacking_genexp_02(self):
+        async def test_gen():
+            for i in range(5):
+                await asyncio.sleep(0.001)
+                yield i, i**2
+
+        async def run():
+            async with contextlib.aclosing(test_gen()) as g:
+                return [*i async for i in (j async for j in g)]
+
+        res = self.loop.run_until_complete(run())
+        self.assertEqual(res, [0, 0, 1, 1, 2, 4, 3, 9, 4, 16])
+
+    def test_async_gen_expression_unpacking_bad_01(self):
+        # attempting to unpack a non-iterable object
+        async def test_gen():
+            for i in range(5):
+                await asyncio.sleep(0.001)
+                yield i if i > 0 else (0,)
+
+        async def run():
+            async with contextlib.aclosing(test_gen()) as g:
+                return [*i async for i in g]
+
+        with self.assertRaises(TypeError) as error:
+            self.loop.run_until_complete(run())
+
+        self.assertEqual(error.exception.args[0], 'Value after * must be an iterable, not int')
+
+    def test_async_gen_expression_unpacking_bad_02(self):
+        # attempting to unpack an async generator (not currently supported, but should it be?)
+        async def test_gen():
+            for i in range(5):
+                await asyncio.sleep(0.001)
+                yield i, i**2
+
+        async def run():
+            async with contextlib.aclosing(test_gen()) as g:
+                return [*(j async for j in i) async for i in g]
+
+        with self.assertRaises(TypeError) as error:
+            self.loop.run_until_complete(run())
+
+        self.assertEqual(error.exception.args[0], 'Value after * must be an iterable, not async_generator')
+
     def test_asyncgen_nonstarted_hooks_are_cancellable(self):
         # See https://bugs.python.org/issue38013
         messages = []
