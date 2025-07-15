@@ -1266,6 +1266,7 @@ class DocTestFinder:
             # try using AST to parse things out
             if (ast_lineno := _ast_docstring_lineno(ast_info, obj, docstring)) is not None:
                 return ast_lineno
+            lineno = 0
 
         # Find the line number for classes.
         if inspect.isclass(obj) and docstring is not None:
@@ -1277,7 +1278,8 @@ class DocTestFinder:
                 return None
             pat = re.compile(r'^\s*class\s*%s\b' %
                              re.escape(getattr(obj, '__name__', '-')))
-            for i, line in enumerate(source_lines):
+            for i in range(getattr(obj, '__firstlineno__', 1)-1, len(source_lines)):
+                line = source_lines[i]
                 if pat.match(line):
                     lineno = i
                     break
@@ -1319,7 +1321,7 @@ class DocTestFinder:
         # mark.
         if lineno is not None:
             if source_lines is None:
-                return lineno+1
+                return None
             pat = re.compile(r'(^|.*:)\s*\w*("|\')')
             for lineno in range(lineno, len(source_lines)):
                 if pat.match(source_lines[lineno]):
