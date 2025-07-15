@@ -31,7 +31,7 @@ class TestPropertyDocTests(unittest.TestCase):
                 >>> del f.x
                 DELORTED
                 """
-                print('DELORTED')
+                print("DELORTED")
 
         tests = doctest.DocTestFinder().find(Foo)
         funcs = [Foo.x, Foo.x.fdel, Foo.x.fset]
@@ -56,7 +56,7 @@ class TestPropertyDocTests(unittest.TestCase):
                 >>> del f.x
                 DELORTED
                 """
-                print('DELORTED')
+                print("DELORTED")
 
         tests = doctest.DocTestFinder().find(Foo)
         funcs = [Foo.x.fdel]
@@ -89,7 +89,7 @@ class TestPropertyDocTests(unittest.TestCase):
                 >>> del f.x
                 DELORTED
                 """
-                print('DELORTED')
+                print("DELORTED")
 
             x = property(xget, xset, xdel, ">>> 'test'\n'test'")
 
@@ -124,7 +124,7 @@ class TestPropertyDocTests(unittest.TestCase):
                 >>> del f.x
                 DELORTED
                 """
-                print('DELORTED')
+                print("DELORTED")
 
             x = property(xget, xset, xdel)
 
@@ -148,7 +148,7 @@ class TestPropertyDocTests(unittest.TestCase):
                 self.y = val
 
             def xdel(self):
-                print('DELORTED')
+                print("DELORTED")
 
             x = property(xget, xset, xdel)
 
@@ -173,7 +173,7 @@ class TestPropertyDocTests(unittest.TestCase):
                 self.y = val
 
             def xdel(self):
-                print('DELORTED')
+                print("DELORTED")
 
             x = property(xget, xset, xdel, _doc)
 
@@ -183,6 +183,5 @@ class TestPropertyDocTests(unittest.TestCase):
         for test, func in zip(tests, funcs):
             self.assertEqual(test.docstring, func.__doc__)
 
-
-if __name__ == '__main__':
-    unittest.main(module='test.test_doctest.test_doctest_properties')
+if __name__ == "__main__":
+    unittest.main(module="test.test_doctest.test_doctest_properties")
