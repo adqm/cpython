@@ -297,6 +297,9 @@ def _ast_docstring_lineno(ast_info, obj, docstring):
     except:
         return None
 
+def _is_single_dispatch(func):
+    return all(hasattr(func, i) for i in ('registry', 'register', 'dispatch'))
+
 def _extract_future_flags(globs):
     """
     Return the compiler-flags associated with the future features that
@@ -1126,6 +1129,21 @@ class DocTestFinder:
             return
         seen.add(id(obj))
 
+        # if we're dealing with a single-dispatch function (or method), recurse
+        # on all of its pieces
+        print('HUH', obj, _is_single_dispatch(obj))
+        if inspect.iscode(obj) and obj.co_name == '__annotate__':
+            print('hmm', dir(obj))
+        if _is_single_dispatch(obj):
+            print('GOT ONE!')
+            for type_, func in obj.registry.items():
+                if type_ != obj:
+                    # recurse to everything but the top-level function
+                    valname = '%s.<registry>.%s' % (name, type_.__name__)
+                    self._find(tests, func, valname, module, source_lines,
+                               ast_info, globs, seen)
+
+
         # Handle all parts of properties
         if isinstance(obj, property) and self._recurse:
             subparts = ['fget', 'fset', 'fdel']
@@ -1228,10 +1246,14 @@ class DocTestFinder:
                 elif obj.__doc__ is None:
                     docstring = ''
                 else:
-                    docstring = obj.__doc__
+                    if (ast_docstring := _ast_docstring_from_object(ast_info, obj)) is not None:
+                        docstring = inspect.cleandoc(ast_docstring.value)
+                    else:
+                        docstring = obj.__doc__
                     if not isinstance(docstring, str):
                         docstring = str(docstring)
             except (TypeError, AttributeError):
+                raise
                 docstring = ''
 
         # Don't bother if the docstring is empty.
