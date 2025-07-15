@@ -244,7 +244,8 @@ def _ast_docstring_info(mod):
             self.inspectable_nodes = {}
 
         def visit_FunctionDef(self, node):
-            key = (self._name_map[node.__class__.__name__], node.name, node.lineno)
+            lineno = min([node.lineno, *(i.lineno for i in node.decorator_list)])
+            key = (self._name_map[node.__class__.__name__], node.name, lineno)
             value = (_get_docstring(node), (descendents := []))
             if self.stack:
                 self.stack[-1].append(key)
@@ -287,11 +288,6 @@ def _ast_docstring_from_object(ast_info, obj):
 def _ast_docstring_lineno(ast_info, obj, docstring):
     try:
         ast_docstring = _ast_docstring_from_object(ast_info, obj)
-        if obj.__name__.endswith('a_cached_property'):
-            print('HUH', repr(ast_docstring))
-            print(obj)
-            print(obj.__name__, obj.__code__.co_firstlineno)
-            print(ast_info.keys())
         if inspect.iscode(obj) or inspect.cleandoc(ast_docstring.value) == inspect.cleandoc(docstring):
             # only return this if the docstring wasn't modified at
             # runtime
@@ -1297,11 +1293,7 @@ class DocTestFinder:
         if inspect.isfunction(obj) and getattr(obj, '__doc__', None):
             obj = inspect.unwrap(obj)
             docstring = getattr(obj, '__doc__', None)
-            print('LOOK', obj, _ast_docstring_lineno(ast_info, obj, docstring))
-            if obj.__name__.endswith('a_cached_property'):
-                print(repr(docstring))
             if (ast_lineno := _ast_docstring_lineno(ast_info, obj, docstring)) is not None:
-                print('GOT', obj, ast_lineno)
                 return ast_lineno
             try:
                 obj = obj.__code__
