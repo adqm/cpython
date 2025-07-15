@@ -31,4 +31,3 @@ class TestFragileDocTestCases(unittest.TestCase):
         test = doctest.DocTestFinder().find(foo)[0]
         self.assertEqual(test.docstring, foo.__doc__)
         self.assertEqual(test.lineno, foo.__code__.co_firstlineno+1)
-

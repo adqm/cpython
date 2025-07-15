@@ -24,6 +24,8 @@ def doctest_skip_if(condition):
         return func
     return decorator
 
+def _find_line(t):
+    return '%04d' % t.lineno if t.lineno is not None else None
 
 # NOTE: There are some additional tests relating to interaction with
 #       zipimport in the test_zipimport_support test module.
@@ -469,7 +471,7 @@ We'll simulate a __file__ attr that ends in pyc:
     >>> tests = finder.find(sample_func)
 
     >>> print(tests)  # doctest: +ELLIPSIS
-    [<DocTest sample_func from test_doctest.py:36 (1 example)>]
+    [<DocTest sample_func from test_doctest.py:38 (1 example)>]
 
 The exact name depends on how test_doctest was invoked, so allow for
 leading path components.
@@ -520,28 +522,28 @@ methods, classmethods, staticmethods, properties, and nested classes.
     >>> finder = doctest.DocTestFinder()
     >>> tests = finder.find(SampleClass)
     >>> for t in tests:
-    ...     print('%2s  %s' % (len(t.examples), t.name))
-     3  SampleClass
-     3  SampleClass.NestedClass
-     1  SampleClass.NestedClass.__init__
-     1  SampleClass.__init__
-     1  SampleClass.a_cached_property
-     2  SampleClass.a_classmethod
-     1  SampleClass.a_property
-     1  SampleClass.a_staticmethod
-     1  SampleClass.double
-     1  SampleClass.get
-     3  SampleClass.setter
+    ...     print('%02d %s %s' % (len(t.examples), _find_line(t), t.name))
+    03 0049 SampleClass
+    03 0128 SampleClass.NestedClass
+    01 0135 SampleClass.NestedClass.__init__
+    01 0065 SampleClass.__init__
+    01 0121 SampleClass.a_cached_property
+    02 0103 SampleClass.a_classmethod
+    01 0079 SampleClass.a_property
+    01 0095 SampleClass.a_staticmethod
+    01 0072 SampleClass.double
+    01 0079 SampleClass.get
+    03 0086 SampleClass.setter
 
 New-style classes are also supported:
 
     >>> tests = finder.find(SampleNewStyleClass)
     >>> for t in tests:
-    ...     print('%2s  %s' % (len(t.examples), t.name))
-     1  SampleNewStyleClass
-     1  SampleNewStyleClass.__init__
-     1  SampleNewStyleClass.double
-     1  SampleNewStyleClass.get
+    ...     print('%02d %s %s' % (len(t.examples), _find_line(t), t.name))
+    01 0146 SampleNewStyleClass
+    01 0153 SampleNewStyleClass.__init__
+    01 0160 SampleNewStyleClass.double
+    01 0167 SampleNewStyleClass.get
 
 Finding Tests in Modules
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -576,23 +578,22 @@ functions, classes, and the `__test__` dictionary, if it exists:
     >>> from test.test_doctest import test_doctest
     >>> tests = finder.find(m, module=test_doctest)
     >>> for t in tests:
-    ...     line = '%04d' % t.lineno if t.lineno is not None else None
-    ...     print('%02d %s %s' % (len(t.examples), line, t.name))
-     01 None some_module
-     03 0047 some_module.SampleClass
-     03 0126 some_module.SampleClass.NestedClass
-     01 0133 some_module.SampleClass.NestedClass.__init__
-     01 0063 some_module.SampleClass.__init__
-     01 0119 some_module.SampleClass.a_cached_property
-     02 0101 some_module.SampleClass.a_classmethod
-     01 0077 some_module.SampleClass.a_property
-     01 0093 some_module.SampleClass.a_staticmethod
-     01 0070 some_module.SampleClass.double
-     01 0077 some_module.SampleClass.get
-     03 0084 some_module.SampleClass.setter
-     01 0001 some_module.__test__.c
-     02 None some_module.__test__.d
-     01 0036 some_module.sample_func
+    ...     print('%02d %s %s' % (len(t.examples), _find_line(t), t.name))
+    01 None some_module
+    03 0049 some_module.SampleClass
+    03 0128 some_module.SampleClass.NestedClass
+    01 0135 some_module.SampleClass.NestedClass.__init__
+    01 0065 some_module.SampleClass.__init__
+    01 0121 some_module.SampleClass.a_cached_property
+    02 0103 some_module.SampleClass.a_classmethod
+    01 0079 some_module.SampleClass.a_property
+    01 0095 some_module.SampleClass.a_staticmethod
+    01 0072 some_module.SampleClass.double
+    01 0079 some_module.SampleClass.get
+    03 0086 some_module.SampleClass.setter
+    01 None some_module.__test__.c
+    02 None some_module.__test__.d
+    01 0038 some_module.sample_func
 
 However, doctest will ignore imported objects from other modules
 (without proper `module=`):
@@ -635,18 +636,18 @@ By default, an object with no doctests doesn't create any tests:
 
     >>> tests = doctest.DocTestFinder().find(SampleClass)
     >>> for t in tests:
-    ...     print('%2s  %s' % (len(t.examples), t.name))
-     3  SampleClass
-     3  SampleClass.NestedClass
-     1  SampleClass.NestedClass.__init__
-     1  SampleClass.__init__
-     1  SampleClass.a_cached_property
-     2  SampleClass.a_classmethod
-     1  SampleClass.a_property
-     1  SampleClass.a_staticmethod
-     1  SampleClass.double
-     1  SampleClass.get
-     3  SampleClass.setter
+    ...     print('%02d %s %s' % (len(t.examples), _find_line(t), t.name))
+    03 0049 SampleClass
+    03 0128 SampleClass.NestedClass
+    01 0135 SampleClass.NestedClass.__init__
+    01 0065 SampleClass.__init__
+    01 0121 SampleClass.a_cached_property
+    02 0103 SampleClass.a_classmethod
+    01 0079 SampleClass.a_property
+    01 0095 SampleClass.a_staticmethod
+    01 0072 SampleClass.double
+    01 0079 SampleClass.get
+    03 0086 SampleClass.setter
 
 By default, that excluded objects with no doctests.  exclude_empty=False
 tells it to include (empty) tests for objects with no doctests.  This feature
@@ -655,20 +656,20 @@ displays.
 
     >>> tests = doctest.DocTestFinder(exclude_empty=False).find(SampleClass)
     >>> for t in tests:
-    ...     print('%2s  %s' % (len(t.examples), t.name))
-     3  SampleClass
-     3  SampleClass.NestedClass
-     1  SampleClass.NestedClass.__init__
-     0  SampleClass.NestedClass.get
-     0  SampleClass.NestedClass.square
-     1  SampleClass.__init__
-     1  SampleClass.a_cached_property
-     2  SampleClass.a_classmethod
-     1  SampleClass.a_property
-     1  SampleClass.a_staticmethod
-     1  SampleClass.double
-     1  SampleClass.get
-     3  SampleClass.setter
+    ...     print('%02d %s %s' % (len(t.examples), _find_line(t), t.name))
+    03 0049 SampleClass
+    03 0128 SampleClass.NestedClass
+    01 0135 SampleClass.NestedClass.__init__
+    00 None SampleClass.NestedClass.get
+    00 None SampleClass.NestedClass.square
+    01 0065 SampleClass.__init__
+    01 0121 SampleClass.a_cached_property
+    02 0103 SampleClass.a_classmethod
+    01 0079 SampleClass.a_property
+    01 0095 SampleClass.a_staticmethod
+    01 0072 SampleClass.double
+    01 0079 SampleClass.get
+    03 0086 SampleClass.setter
 
 When used with `exclude_empty=False` we are also interested in line numbers
 of doctests that are empty.
@@ -700,8 +701,8 @@ using the `recurse` flag:
 
     >>> tests = doctest.DocTestFinder(recurse=False).find(SampleClass)
     >>> for t in tests:
-    ...     print('%2s  %s' % (len(t.examples), t.name))
-     3  SampleClass
+    ...     print('%02d %s %s' % (len(t.examples), _find_line(t), t.name))
+    03 0049 SampleClass
 
 Line numbers
 ~~~~~~~~~~~~
