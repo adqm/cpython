@@ -104,6 +104,7 @@ import sys
 import traceback
 import types
 import unittest
+import functools
 from io import StringIO, IncrementalNewlineDecoder
 from collections import namedtuple
 import _colorize  # Used in doctests
@@ -286,6 +287,11 @@ def _ast_docstring_from_object(ast_info, obj):
 def _ast_docstring_lineno(ast_info, obj, docstring):
     try:
         ast_docstring = _ast_docstring_from_object(ast_info, obj)
+        if obj.__name__.endswith('a_cached_property'):
+            print('HUH', repr(ast_docstring))
+            print(obj)
+            print(obj.__name__, obj.__code__.co_firstlineno)
+            print(ast_info.keys())
         if inspect.iscode(obj) or inspect.cleandoc(ast_docstring.value) == inspect.cleandoc(docstring):
             # only return this if the docstring wasn't modified at
             # runtime
@@ -1137,7 +1143,7 @@ class DocTestFinder:
                 if func is not None:
                     valname = '%s.%s' % (name, subpart)
                     self._find(tests, func, valname, module, source_lines,
-                               globs, seen)
+                               ast_info, globs, seen)
             if obj.__doc__ == obj.fget.__doc__ and id(obj.fget) in seen:
                 # don't bother with this test if we've already looked at the
                 # getter unless their docstrings are different (to avoid
@@ -1264,8 +1270,6 @@ class DocTestFinder:
             # try using AST to parse things out
             if (ast_lineno := _ast_docstring_lineno(ast_info, obj, docstring)) is not None:
                 return ast_lineno
-            # fall back to source_lines
-            lineno = 0
 
         # Find the line number for classes.
         if inspect.isclass(obj) and docstring is not None:
@@ -1283,13 +1287,21 @@ class DocTestFinder:
                     break
 
         # Find the line number for functions & methods.
-        if inspect.ismethod(obj): obj = obj.__func__
+        if isinstance(obj, functools.cached_property):
+            obj = obj.func
+        if inspect.ismethod(obj):
+            obj = obj.__func__
+        obj = inspect.unwrap(obj)
         if isinstance(obj, property):
             obj = obj.fget
         if inspect.isfunction(obj) and getattr(obj, '__doc__', None):
-            # We don't use `docstring` var here, because `obj` can be changed.
             obj = inspect.unwrap(obj)
+            docstring = getattr(obj, '__doc__', None)
+            print('LOOK', obj, _ast_docstring_lineno(ast_info, obj, docstring))
+            if obj.__name__.endswith('a_cached_property'):
+                print(repr(docstring))
             if (ast_lineno := _ast_docstring_lineno(ast_info, obj, docstring)) is not None:
+                print('GOT', obj, ast_lineno)
                 return ast_lineno
             try:
                 obj = obj.__code__

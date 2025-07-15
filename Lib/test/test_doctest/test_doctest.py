@@ -576,22 +576,23 @@ functions, classes, and the `__test__` dictionary, if it exists:
     >>> from test.test_doctest import test_doctest
     >>> tests = finder.find(m, module=test_doctest)
     >>> for t in tests:
-    ...     print('%2s  %s' % (len(t.examples), t.name))
-     1  some_module
-     3  some_module.SampleClass
-     3  some_module.SampleClass.NestedClass
-     1  some_module.SampleClass.NestedClass.__init__
-     1  some_module.SampleClass.__init__
-     1  some_module.SampleClass.a_cached_property
-     2  some_module.SampleClass.a_classmethod
-     1  some_module.SampleClass.a_property
-     1  some_module.SampleClass.a_staticmethod
-     1  some_module.SampleClass.double
-     1  some_module.SampleClass.get
-     3  some_module.SampleClass.setter
-     1  some_module.__test__.c
-     2  some_module.__test__.d
-     1  some_module.sample_func
+    ...     line = '%04d' % t.lineno if t.lineno is not None else None
+    ...     print('%02d %s %s' % (len(t.examples), line, t.name))
+     01 None some_module
+     03 0047 some_module.SampleClass
+     03 0126 some_module.SampleClass.NestedClass
+     01 0133 some_module.SampleClass.NestedClass.__init__
+     01 0063 some_module.SampleClass.__init__
+     01 0119 some_module.SampleClass.a_cached_property
+     02 0101 some_module.SampleClass.a_classmethod
+     01 0077 some_module.SampleClass.a_property
+     01 0093 some_module.SampleClass.a_staticmethod
+     01 0070 some_module.SampleClass.double
+     01 0077 some_module.SampleClass.get
+     03 0084 some_module.SampleClass.setter
+     01 0001 some_module.__test__.c
+     02 None some_module.__test__.d
+     01 0036 some_module.sample_func
 
 However, doctest will ignore imported objects from other modules
 (without proper `module=`):
