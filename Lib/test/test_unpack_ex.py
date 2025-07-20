@@ -254,14 +254,14 @@ Error messages for specific failure modes of unpacking
     ...
     [*x if x else y for x in z]
      ^^^^^^^^^^^^^^
-    SyntaxError: invalid starred expression.  did you forget to wrap the conditional expression in parentheses?
+    SyntaxError: invalid starred expression. Did you forget to wrap the conditional expression in parentheses?
 
     >>> [*x if x else y]
     Traceback (most recent call last):
     ...
     [*x if x else y]
      ^^^^^^^^^^^^^^
-    SyntaxError: invalid starred expression.  did you forget to wrap the conditional expression in parentheses?
+    SyntaxError: invalid starred expression. Did you forget to wrap the conditional expression in parentheses?
 
     >>> [x if x else *y for x in z]
     Traceback (most recent call last):
@@ -282,7 +282,7 @@ Error messages for specific failure modes of unpacking
     ...
     {**x if x else y}
      ^^^^^^^^^^^^^^^^
-    SyntaxError: invalid double starred expression.  did you forget to wrap the conditional expression in parentheses?
+    SyntaxError: invalid double starred expression. Did you forget to wrap the conditional expression in parentheses?
     >>> {x if x else **y}
     Traceback (most recent call last):
     ...

@@ -1512,7 +1512,7 @@ invalid_double_starred_kvpairs:
     | invalid_kvpair_unpacking [',']
     | ','.double_starred_kvpair+ ',' (invalid_kvpair | invalid_kvpair_unpacking)
     | a='**' b=if_expression {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid double starred expression.  did you forget to wrap the conditional expression in parentheses?") }
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid double starred expression. Did you forget to wrap the conditional expression in parentheses?") }
     | expression a=':' &('}'|',') { RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "expression expected after dictionary key and ':'") }
 invalid_kvpair:
     | a=expression !(':') {
@@ -1528,7 +1528,7 @@ invalid_starred_expression_unpacking_listset:
         RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot use dict unpacking here") }
 invalid_starred_expression_unpacking:
     | a='*' b=if_expression {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid starred expression.  did you forget to wrap the conditional expression in parentheses?") }
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid starred expression. Did you forget to wrap the conditional expression in parentheses?") }
     | a='*' expression '=' b=expression { RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot assign to iterable argument unpacking") }
 invalid_starred_expression:
     | '*' { RAISE_SYNTAX_ERROR("Invalid star expression") }
