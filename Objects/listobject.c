@@ -1404,6 +1404,9 @@ _list_extend(PyListObject *self, PyObject * const *iterables,
 {
     Py_ssize_t i;
     PyObject *iterable;
+    if (iterables_length == 0) {
+        return 0;
+    }
 
     int res = -1;
     for (i = 0; i < iterables_length; i++) {

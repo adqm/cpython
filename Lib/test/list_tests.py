@@ -270,7 +270,14 @@ class CommonTest(seq_tests.CommonTest):
         self.assertEqual(a, list("spameggs"))
 
         self.assertRaises(TypeError, a.extend, None)
-        self.assertRaises(TypeError, a.extend)
+
+        old_id = id(a)
+        old_val = a[:]
+        b = a.extend()
+        self.assertIs(b, None)
+        self.assertEqual(old_id, id(a))
+        self.assertEqual(old_val, a)
+
 
         # overflow test. issue1621
         class CustomIter:
