@@ -2082,7 +2082,7 @@ PySequence_List(PyObject *v)
     if (result == NULL)
         return NULL;
 
-    rv = _PyList_Extend((PyListObject *)result, v);
+    rv = _PyList_Extend((PyListObject *)result, (PyObject *[]){v}, 1);
     if (rv == NULL) {
         Py_DECREF(result);
         return NULL;

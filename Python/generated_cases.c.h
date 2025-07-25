@@ -7897,7 +7897,7 @@
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
             PyObject *iterable = PyStackRef_AsPyObjectBorrow(iterable_st);
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyObject *none_val = _PyList_Extend((PyListObject *)list, iterable);
+            PyObject *none_val = _PyList_Extend((PyListObject *)list, (PyObject *[]){iterable}, 1);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (none_val == NULL) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);

@@ -1399,58 +1399,68 @@ list_extend_dictitems(PyListObject *self, PyDictObject *dict)
 }
 
 static int
-_list_extend(PyListObject *self, PyObject *iterable)
+_list_extend(PyListObject *self, PyObject * const *iterables,
+                 Py_ssize_t iterables_length)
 {
-    // Special case:
-    // lists and tuples which can use PySequence_Fast ops
+    Py_ssize_t i;
+    PyObject *iterable;
+
     int res = -1;
-    if ((PyObject *)self == iterable) {
-        Py_BEGIN_CRITICAL_SECTION(self);
-        res = list_inplace_repeat_lock_held(self, 2);
-        Py_END_CRITICAL_SECTION();
-    }
-    else if (PyList_CheckExact(iterable)) {
-        Py_BEGIN_CRITICAL_SECTION2(self, iterable);
-        res = list_extend_lock_held(self, iterable);
-        Py_END_CRITICAL_SECTION2();
-    }
-    else if (PyTuple_CheckExact(iterable)) {
-        Py_BEGIN_CRITICAL_SECTION(self);
-        res = list_extend_lock_held(self, iterable);
-        Py_END_CRITICAL_SECTION();
-    }
-    else if (PyAnySet_CheckExact(iterable)) {
-        Py_BEGIN_CRITICAL_SECTION2(self, iterable);
-        res = list_extend_set(self, (PySetObject *)iterable);
-        Py_END_CRITICAL_SECTION2();
-    }
-    else if (PyDict_CheckExact(iterable)) {
-        Py_BEGIN_CRITICAL_SECTION2(self, iterable);
-        res = list_extend_dict(self, (PyDictObject *)iterable, 0 /*keys*/);
-        Py_END_CRITICAL_SECTION2();
-    }
-    else if (Py_IS_TYPE(iterable, &PyDictKeys_Type)) {
-        PyDictObject *dict = ((_PyDictViewObject *)iterable)->dv_dict;
-        Py_BEGIN_CRITICAL_SECTION2(self, dict);
-        res = list_extend_dict(self, dict, 0 /*keys*/);
-        Py_END_CRITICAL_SECTION2();
-    }
-    else if (Py_IS_TYPE(iterable, &PyDictValues_Type)) {
-        PyDictObject *dict = ((_PyDictViewObject *)iterable)->dv_dict;
-        Py_BEGIN_CRITICAL_SECTION2(self, dict);
-        res = list_extend_dict(self, dict, 1 /*values*/);
-        Py_END_CRITICAL_SECTION2();
-    }
-    else if (Py_IS_TYPE(iterable, &PyDictItems_Type)) {
-        PyDictObject *dict = ((_PyDictViewObject *)iterable)->dv_dict;
-        Py_BEGIN_CRITICAL_SECTION2(self, dict);
-        res = list_extend_dictitems(self, dict);
-        Py_END_CRITICAL_SECTION2();
-    }
-    else {
-        Py_BEGIN_CRITICAL_SECTION(self);
-        res = list_extend_iter_lock_held(self, iterable);
-        Py_END_CRITICAL_SECTION();
+    for (i = 0; i < iterables_length; i++) {
+        // Special case:
+        // lists and tuples which can use PySequence_Fast ops
+        iterable = iterables[i];
+        if ((PyObject *)self == iterable) {
+            Py_BEGIN_CRITICAL_SECTION(self);
+            res = list_inplace_repeat_lock_held(self, 2);
+            Py_END_CRITICAL_SECTION();
+        }
+        else if (PyList_CheckExact(iterable)) {
+            Py_BEGIN_CRITICAL_SECTION2(self, iterable);
+            res = list_extend_lock_held(self, iterable);
+            Py_END_CRITICAL_SECTION2();
+        }
+        else if (PyTuple_CheckExact(iterable)) {
+            Py_BEGIN_CRITICAL_SECTION(self);
+            res = list_extend_lock_held(self, iterable);
+            Py_END_CRITICAL_SECTION();
+        }
+        else if (PyAnySet_CheckExact(iterable)) {
+            Py_BEGIN_CRITICAL_SECTION2(self, iterable);
+            res = list_extend_set(self, (PySetObject *)iterable);
+            Py_END_CRITICAL_SECTION2();
+        }
+        else if (PyDict_CheckExact(iterable)) {
+            Py_BEGIN_CRITICAL_SECTION2(self, iterable);
+            res = list_extend_dict(self, (PyDictObject *)iterable, 0 /*keys*/);
+            Py_END_CRITICAL_SECTION2();
+        }
+        else if (Py_IS_TYPE(iterable, &PyDictKeys_Type)) {
+            PyDictObject *dict = ((_PyDictViewObject *)iterable)->dv_dict;
+            Py_BEGIN_CRITICAL_SECTION2(self, dict);
+            res = list_extend_dict(self, dict, 0 /*keys*/);
+            Py_END_CRITICAL_SECTION2();
+        }
+        else if (Py_IS_TYPE(iterable, &PyDictValues_Type)) {
+            PyDictObject *dict = ((_PyDictViewObject *)iterable)->dv_dict;
+            Py_BEGIN_CRITICAL_SECTION2(self, dict);
+            res = list_extend_dict(self, dict, 1 /*values*/);
+            Py_END_CRITICAL_SECTION2();
+        }
+        else if (Py_IS_TYPE(iterable, &PyDictItems_Type)) {
+            PyDictObject *dict = ((_PyDictViewObject *)iterable)->dv_dict;
+            Py_BEGIN_CRITICAL_SECTION2(self, dict);
+            res = list_extend_dictitems(self, dict);
+            Py_END_CRITICAL_SECTION2();
+        }
+        else {
+            Py_BEGIN_CRITICAL_SECTION(self);
+            res = list_extend_iter_lock_held(self, iterable);
+            Py_END_CRITICAL_SECTION();
+        }
+        if (res < 0){
+            return res;
+        }
     }
     return res;
 }
@@ -1458,36 +1468,38 @@ _list_extend(PyListObject *self, PyObject *iterable)
 /*[clinic input]
 list.extend as list_extend
 
-     iterable: object
-     /
+     *iterables: array
 
-Extend list by appending elements from the iterable.
+Extend list by appending elements from each of the given iterables, in order.
 [clinic start generated code]*/
 
 static PyObject *
-list_extend_impl(PyListObject *self, PyObject *iterable)
-/*[clinic end generated code: output=b0eba9e0b186d5ce input=979da7597a515791]*/
+list_extend_impl(PyListObject *self, PyObject * const *iterables,
+                 Py_ssize_t iterables_length)
+/*[clinic end generated code: output=08061368fe74f380 input=4893d113f7518c80]*/
 {
-    if (_list_extend(self, iterable) < 0) {
+    if (_list_extend(self, iterables, iterables_length) < 0) {
         return NULL;
     }
     Py_RETURN_NONE;
 }
 
 PyObject *
-_PyList_Extend(PyListObject *self, PyObject *iterable)
+_PyList_Extend(PyListObject *self, PyObject * const *iterables,
+                 Py_ssize_t iterables_length)
 {
-    return list_extend((PyObject*)self, iterable);
+    return list_extend((PyObject*)self, iterables, iterables_length);
 }
 
 int
-PyList_Extend(PyObject *self, PyObject *iterable)
+PyList_Extend(PyObject *self, PyObject * const *iterables,
+                 Py_ssize_t iterables_length)
 {
     if (!PyList_Check(self)) {
         PyErr_BadInternalCall();
         return -1;
     }
-    return _list_extend((PyListObject*)self, iterable);
+    return _list_extend((PyListObject*)self, iterables, iterables_length);
 }
 
 
@@ -1509,7 +1521,7 @@ static PyObject *
 list_inplace_concat(PyObject *_self, PyObject *other)
 {
     PyListObject *self = (PyListObject *)_self;
-    if (_list_extend(self, other) < 0) {
+    if (_list_extend(self, (PyObject *[]){other}, 1) < 0) {
         return NULL;
     }
     return Py_NewRef(self);
@@ -3492,7 +3504,7 @@ list___init___impl(PyListObject *self, PyObject *iterable)
         Py_END_CRITICAL_SECTION();
     }
     if (iterable != NULL) {
-        if (_list_extend(self, iterable) < 0) {
+        if (_list_extend(self, (PyObject *[]){iterable}, 1) < 0) {
             return -1;
         }
     }

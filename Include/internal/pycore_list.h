@@ -12,7 +12,8 @@ extern "C" {
 #include "pycore_stackref.h"
 #endif
 
-PyAPI_FUNC(PyObject*) _PyList_Extend(PyListObject *, PyObject *);
+PyAPI_FUNC(PyObject*) _PyList_Extend(PyListObject *, PyObject * const *iterables,
+                 Py_ssize_t iterables_length);
 PyAPI_FUNC(PyObject) *_PyList_SliceSubscript(PyObject*, PyObject*);
 extern void _PyList_DebugMallocStats(FILE *out);
 // _PyList_GetItemRef should be used only when the object is known as a list

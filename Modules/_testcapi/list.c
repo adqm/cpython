@@ -56,7 +56,7 @@ list_extend(PyObject* Py_UNUSED(module), PyObject *args)
     }
     NULLABLE(obj);
     NULLABLE(arg);
-    RETURN_INT(PyList_Extend(obj, arg));
+    RETURN_INT(PyList_Extend(obj, (PyObject *[]){arg}, 1));
 }
 
 

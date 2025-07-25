@@ -2040,7 +2040,7 @@ dummy_func(
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
             PyObject *iterable = PyStackRef_AsPyObjectBorrow(iterable_st);
 
-            PyObject *none_val = _PyList_Extend((PyListObject *)list, iterable);
+            (PyObject *[]){v}, 1PyObject *none_val = _PyList_Extend((PyListObject *)list, (PyObject *[]){iterable}, 1);
             if (none_val == NULL) {
                 int matches = _PyErr_ExceptionMatches(tstate, PyExc_TypeError);
                 if (matches &&

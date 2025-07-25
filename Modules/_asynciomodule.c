@@ -4068,12 +4068,12 @@ _asyncio_all_tasks_impl(PyObject *module, PyObject *loop)
         Py_DECREF(loop);
         return NULL;
     }
-    if (PyList_Extend(tasks, state->non_asyncio_eager_tasks) < 0) {
+    if (PyList_Extend(tasks, (PyObject *[]){state->non_asyncio_eager_tasks}, 1) < 0) {
         Py_DECREF(tasks);
         Py_DECREF(loop);
         return NULL;
     }
-    if (PyList_Extend(tasks, state->non_asyncio_tasks) < 0) {
+    if (PyList_Extend(tasks, (PyObject *[]){state->non_asyncio_tasks}, 1) < 0) {
         Py_DECREF(tasks);
         Py_DECREF(loop);
         return NULL;
