@@ -1349,11 +1349,12 @@ class UserList(_collections_abc.MutableSequence):
     def sort(self, /, *args, **kwds):
         self.data.sort(*args, **kwds)
 
-    def extend(self, other):
-        if isinstance(other, UserList):
-            self.data.extend(other.data)
-        else:
-            self.data.extend(other)
+    def extend(self, *others):
+        for other in others:
+            if isinstance(other, UserList):
+                self.data.extend(other.data)
+            else:
+             self.data.extend(other)
 
 
 ################################################################################
