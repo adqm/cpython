@@ -3660,13 +3660,18 @@ dict_update_common(PyObject *self, PyObject *args, PyObject *kwds,
                    const char *methname)
 {
     PyObject *arg = NULL;
+
+    Py_ssize_t nargs = PyTuple_GET_SIZE(args);
+
+    Py_ssize_t i;
     int result = 0;
 
-    if (!PyArg_UnpackTuple(args, methname, 0, 1, &arg)) {
-        result = -1;
-    }
-    else if (arg != NULL) {
+    for (i=0; i < nargs; i++) {
+        arg = PyTuple_GET_ITEM(args, i);
         result = dict_update_arg(self, arg);
+        if (result < 0) {
+            return result;
+        }
     }
 
     if (result == 0 && kwds != NULL) {
