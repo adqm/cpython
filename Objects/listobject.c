@@ -1474,13 +1474,13 @@ list.extend as list_extend
 
      *iterables: array
 
-Extend list by appending elements from the iterable.
+Extend list by appending elements from each of the given iterables, in order.
 [clinic start generated code]*/
 
 static PyObject *
 list_extend_impl(PyListObject *self, PyObject * const *iterables,
                  Py_ssize_t iterables_length)
-/*[clinic end generated code: output=08061368fe74f380 input=4893d113f7518c80]*/
+/*[clinic end generated code: output=08061368fe74f380 input=fc9d3d721b12ddac]*/
 {
     if (_list_extend(self, iterables, iterables_length) < 0) {
         return NULL;

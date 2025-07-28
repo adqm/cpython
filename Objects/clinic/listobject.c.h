@@ -129,7 +129,7 @@ PyDoc_STRVAR(list_extend__doc__,
 "extend($self, /, *iterables)\n"
 "--\n"
 "\n"
-"Extend list by appending elements from the iterable.");
+"Extend list by appending elements from each of the given iterables, in order.");
 
 #define LIST_EXTEND_METHODDEF    \
     {"extend", _PyCFunction_CAST(list_extend), METH_FASTCALL, list_extend__doc__},
@@ -473,4 +473,4 @@ list___reversed__(PyObject *self, PyObject *Py_UNUSED(ignored))
 {
     return list___reversed___impl((PyListObject *)self);
 }
-/*[clinic end generated code: output=c81b740f643ec448 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=5c23278594453aa8 input=a9049054013a1b77]*/

@@ -4733,9 +4733,10 @@ PyDoc_STRVAR(getitem__doc__,
 "__getitem__($self, key, /)\n--\n\nReturn self[key].");
 
 PyDoc_STRVAR(update__doc__,
-"D.update([E, ]**F) -> None.  Update D from mapping/iterable E and F.\n\
-If E is present and has a .keys() method, then does:  for k in E.keys(): D[k] = E[k]\n\
-If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v\n\
+"D.update(*E, **F) -> None.  Update D from mappings/iterables in E, and from F.\n\
+For each element e in E:\n\
+   If e has a .keys() method, do the following:  for k in E.keys(): D[k] = E[k]\n\
+   If e lacks a .keys() method, do the following:  for k, v in E: D[k] = v\n\
 In either case, this is followed by: for k in F:  D[k] = F[k]");
 
 /* Forward */
