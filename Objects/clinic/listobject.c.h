@@ -126,23 +126,28 @@ list_append(PyObject *self, PyObject *object)
 }
 
 PyDoc_STRVAR(list_extend__doc__,
-"extend($self, iterable, /)\n"
+"extend($self, /, *iterables)\n"
 "--\n"
 "\n"
 "Extend list by appending elements from the iterable.");
 
 #define LIST_EXTEND_METHODDEF    \
-    {"extend", (PyCFunction)list_extend, METH_O, list_extend__doc__},
+    {"extend", _PyCFunction_CAST(list_extend), METH_FASTCALL, list_extend__doc__},
 
 static PyObject *
-list_extend_impl(PyListObject *self, PyObject *iterable);
+list_extend_impl(PyListObject *self, PyObject * const *iterables,
+                 Py_ssize_t iterables_length);
 
 static PyObject *
-list_extend(PyObject *self, PyObject *iterable)
+list_extend(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
 {
     PyObject *return_value = NULL;
+    PyObject * const *iterables;
+    Py_ssize_t iterables_length;
 
-    return_value = list_extend_impl((PyListObject *)self, iterable);
+    iterables = args;
+    iterables_length = nargs;
+    return_value = list_extend_impl((PyListObject *)self, iterables, iterables_length);
 
     return return_value;
 }
@@ -468,4 +473,4 @@ list___reversed__(PyObject *self, PyObject *Py_UNUSED(ignored))
 {
     return list___reversed___impl((PyListObject *)self);
 }
-/*[clinic end generated code: output=ae13fc2b56dc27c2 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=c81b740f643ec448 input=a9049054013a1b77]*/

@@ -1399,7 +1399,7 @@ list_extend_dictitems(PyListObject *self, PyDictObject *dict)
 }
 
 static int
-_list_extend(PyListObject *self, PyObject *iterable)
+_list_extend_single(PyListObject *self, PyObject *iterable)
 {
     // Special case:
     // lists and tuples which can use PySequence_Fast ops
@@ -1455,20 +1455,34 @@ _list_extend(PyListObject *self, PyObject *iterable)
     return res;
 }
 
+static int
+_list_extend(PyListObject *self, PyObject * const *iterables, Py_ssize_t iterables_count)
+{
+    Py_ssize_t i;
+    int res = -1;
+    for (i = 0; i < iterables_count; i++) {
+        res = _list_extend_single(self, iterables[i]);
+        if (res < 0) {
+            return res;
+        }
+    }
+    return res;
+}
+
 /*[clinic input]
 list.extend as list_extend
 
-     iterable: object
-     /
+     *iterables: array
 
 Extend list by appending elements from the iterable.
 [clinic start generated code]*/
 
 static PyObject *
-list_extend_impl(PyListObject *self, PyObject *iterable)
-/*[clinic end generated code: output=b0eba9e0b186d5ce input=979da7597a515791]*/
+list_extend_impl(PyListObject *self, PyObject * const *iterables,
+                 Py_ssize_t iterables_length)
+/*[clinic end generated code: output=08061368fe74f380 input=4893d113f7518c80]*/
 {
-    if (_list_extend(self, iterable) < 0) {
+    if (_list_extend(self, iterables, iterables_length) < 0) {
         return NULL;
     }
     Py_RETURN_NONE;
@@ -1477,7 +1491,7 @@ list_extend_impl(PyListObject *self, PyObject *iterable)
 PyObject *
 _PyList_Extend(PyListObject *self, PyObject *iterable)
 {
-    return list_extend((PyObject*)self, iterable);
+    return list_extend((PyObject*)self, (PyObject *[]){iterable}, 1);
 }
 
 int
@@ -1487,7 +1501,7 @@ PyList_Extend(PyObject *self, PyObject *iterable)
         PyErr_BadInternalCall();
         return -1;
     }
-    return _list_extend((PyListObject*)self, iterable);
+    return _list_extend((PyListObject*)self, (PyObject *[]){iterable}, 1);
 }
 
 
@@ -1509,7 +1523,7 @@ static PyObject *
 list_inplace_concat(PyObject *_self, PyObject *other)
 {
     PyListObject *self = (PyListObject *)_self;
-    if (_list_extend(self, other) < 0) {
+    if (_list_extend_single(self, other) < 0) {
         return NULL;
     }
     return Py_NewRef(self);
@@ -3492,7 +3506,7 @@ list___init___impl(PyListObject *self, PyObject *iterable)
         Py_END_CRITICAL_SECTION();
     }
     if (iterable != NULL) {
-        if (_list_extend(self, iterable) < 0) {
+        if (_list_extend_single(self, iterable) < 0) {
             return -1;
         }
     }
