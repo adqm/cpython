@@ -1459,14 +1459,14 @@ static int
 _list_extend(PyListObject *self, PyObject * const *iterables, Py_ssize_t iterables_count)
 {
     Py_ssize_t i;
-    int res = -1;
+    int res;
     for (i = 0; i < iterables_count; i++) {
         res = _list_extend_single(self, iterables[i]);
         if (res < 0) {
             return res;
         }
     }
-    return res;
+    return 0;
 }
 
 /*[clinic input]
