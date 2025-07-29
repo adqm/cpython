@@ -3660,7 +3660,6 @@ dict_update_common(PyObject *self, PyObject *args, PyObject *kwds,
                    const char *methname)
 {
     PyObject *arg = NULL;
-
     Py_ssize_t nargs = PyTuple_GET_SIZE(args);
 
     Py_ssize_t i;

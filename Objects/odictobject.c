@@ -2258,21 +2258,19 @@ mutablemapping_update(PyObject *self, PyObject *args, PyObject *kwargs)
     int res;
     /* first handle args, if any */
     assert(args == NULL || PyTuple_Check(args));
-    Py_ssize_t len = (args != NULL) ? PyTuple_GET_SIZE(args) : 0;
-    if (len > 1) {
-        const char *msg = "update() takes at most 1 positional argument (%zd given)";
-        PyErr_Format(PyExc_TypeError, msg, len);
-        return NULL;
-    }
 
-    if (len) {
-        PyObject *other = PyTuple_GET_ITEM(args, 0);  /* borrowed reference */
-        assert(other != NULL);
-        Py_INCREF(other);
-        res = mutablemapping_update_arg(self, other);
-        Py_DECREF(other);
-        if (res < 0) {
-            return NULL;
+    if (args != NULL) {
+        Py_ssize_t nargs = PyTuple_GET_SIZE(args);
+        Py_ssize_t i;
+        for (i = 0; i < nargs; i++){
+            PyObject *other = PyTuple_GET_ITEM(args, i);  /* borrowed reference */
+            assert(other != NULL);
+            Py_INCREF(other);
+            res = mutablemapping_update_arg(self, other);
+            Py_DECREF(other);
+            if (res < 0) {
+                return NULL;
+            }
         }
     }
 
