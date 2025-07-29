@@ -104,12 +104,12 @@ class OrderedDictTests:
             [('a', 1), ('b', 2), ('c', 3), ('d', 4), ('e', 5), ('f', 6), ('g', 7)])
 
         self.assertRaises(TypeError, OrderedDict().update, 42)
-        self.assertRaises(TypeError, OrderedDict().update, (), ())
-        self.assertRaises(TypeError, OrderedDict.update)
 
         self.assertRaises(TypeError, OrderedDict().update, 42)
-        self.assertRaises(TypeError, OrderedDict().update, (), ())
-        self.assertRaises(TypeError, OrderedDict.update)
+
+        original_value = copy.deepcopy(od)
+        od.update()
+        self.assertEqual(original_value, od)
 
     def test_init_calls(self):
         calls = []

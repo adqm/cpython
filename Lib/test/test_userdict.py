@@ -161,7 +161,6 @@ class UserDictTest(mapping_tests.TestHashMappingProtocol):
             d.update(**{kw: 42})
             self.assertEqual(list(d.items()), [(kw, 42)])
         self.assertRaises(TypeError, collections.UserDict().update, 42)
-        self.assertRaises(TypeError, collections.UserDict().update, {}, {})
         self.assertRaises(TypeError, collections.UserDict.update)
 
     def test_missing(self):
