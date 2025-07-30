@@ -1104,12 +1104,16 @@ class MutableSequence(Sequence):
         for i in range(n//2):
             self[i], self[n-i-1] = self[n-i-1], self[i]
 
-    def extend(self, values):
-        'S.extend(iterable) -- extend sequence by appending elements from the iterable'
-        if values is self:
-            values = list(values)
-        for v in values:
-            self.append(v)
+    def extend(self, *iterables):
+        """
+        S.extend(*iterable) -- extend sequence by appending elements from each
+        of the provided iterables, in order
+        """
+        for iterable in iterables:
+            if iterable is self:
+                iterable = list(iterable)
+            for v in iterable:
+                self.append(v)
 
     def pop(self, index=-1):
         '''S.pop([index]) -> item -- remove and return item at index (default last).
