@@ -1501,7 +1501,7 @@ PyList_Extend(PyObject *self, PyObject *iterable)
         PyErr_BadInternalCall();
         return -1;
     }
-    return _list_extend((PyListObject*)self, (PyObject *[]){iterable}, 1);
+    return _list_extend_single((PyListObject*)self, iterable);
 }
 
 
