@@ -1354,7 +1354,7 @@ class UserList(_collections_abc.MutableSequence):
             if isinstance(other, UserList):
                 self.data.extend(other.data)
             else:
-             self.data.extend(other)
+                self.data.extend(other)
 
 
 ################################################################################
