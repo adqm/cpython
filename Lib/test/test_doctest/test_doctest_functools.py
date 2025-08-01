@@ -109,8 +109,39 @@ class TestFunctoolsDocTests(unittest.TestCase):
             return x*2
 
         tests = doctest.DocTestFinder().find(foo)
-        print(tests)
         funcs = [foo.registry[k] for k in [object, int, str]]
+        self.assertEqual(len(tests), 3)
+        for test, func in zip(tests, funcs):
+            self.assertEqual(inspect.cleandoc(test.docstring), inspect.cleandoc(func.__doc__))
+
+    def test_singledispatchmethod(self):
+        class Foo:
+            @functools.singledispatchmethod
+            def foo(self, x):
+                """
+                >>> foo(4.2)
+                4.2
+                """
+                return x
+
+            @foo.register
+            def _(self, x: int):
+                """
+                >>> foo(4)
+                16
+                """
+                return x**2
+
+            @foo.register
+            def _(self, x: str):
+                """
+                >>> foo("cat")
+                'catcat'
+                """
+                return x*2
+
+        tests = doctest.DocTestFinder().find(Foo)
+        funcs = [Foo.__dict__['foo'].dispatcher.registry[k] for k in [object, int, str]]
         self.assertEqual(len(tests), 3)
         for test, func in zip(tests, funcs):
             self.assertEqual(inspect.cleandoc(test.docstring), inspect.cleandoc(func.__doc__))

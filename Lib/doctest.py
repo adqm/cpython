@@ -1114,6 +1114,14 @@ class DocTestFinder:
             pass
         return inspect.isroutine(maybe_routine)
 
+    def _is_singledispatch(self, obj):
+        return (
+            inspect.isroutine(obj)
+            and hasattr(obj, 'registry')
+            and hasattr(obj, 'register')
+            and hasattr(obj, 'dispatch')
+        )
+
     def _find(self, tests, obj, name, module, source_lines, ast_info, globs, seen):
         """
         Find tests for the given object and any contained objects, and
@@ -1147,7 +1155,8 @@ class DocTestFinder:
                 # redundant tests from sharing a docstring)
                 return
 
-        if inspect.isroutine(obj) and hasattr(obj, 'registry') and hasattr(obj, 'register') and hasattr(obj, 'dispatch'):
+        # handle singledispatch functions
+        if self._is_singledispatch(obj) and self._recurse:
             for type_, func in obj.registry.items():
                 if type_ is object:
                     continue
@@ -1200,6 +1209,11 @@ class DocTestFinder:
                       self._from_module(module, val)):
                     valname = '%s.%s' % (name, valname)
                     self._find(tests, val, valname, module, source_lines, ast_info,
+                               globs, seen)
+
+                elif hasattr(val, 'dispatcher') and self._is_singledispatch(val.dispatcher):
+                    valname = '%s.%s' % (name, valname)
+                    self._find(tests, val.dispatcher, valname, module, source_lines, ast_info,
                                globs, seen)
 
         # Look for tests in a function's code object's constants
