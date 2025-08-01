@@ -1,3 +1,5 @@
+# ruff: noqa: F811
+
 import doctest
 import unittest
 
