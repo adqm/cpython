@@ -1147,6 +1147,13 @@ class DocTestFinder:
                 # redundant tests from sharing a docstring)
                 return
 
+        if inspect.isroutine(obj) and hasattr(obj, 'registry') and hasattr(obj, 'register') and hasattr(obj, 'dispatch'):
+            for type_, func in obj.registry.items():
+                if type_ is object:
+                    continue
+                valname = '%s.<registry>.%s' % (name, type_.__name__)
+                self._find(tests, func, valname, module, source_lines, ast_info, globs, seen)
+
         # Find a test for this object, and add it to the list of tests.
         test = self._get_test(obj, name, module, globs, source_lines, ast_info)
         if test is not None:
