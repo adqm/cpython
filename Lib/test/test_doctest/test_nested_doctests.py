@@ -51,4 +51,3 @@ class TestNestedPropertyDocTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main(module='test.test_doctest.test_doctest_properties')
-
