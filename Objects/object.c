@@ -2122,7 +2122,7 @@ _dir_locals(void)
         return NULL;
     }
 
-    names = PyMapping_Keys(locals);
+    names = string_keys(locals);
     Py_DECREF(locals);
     if (!names) {
         return NULL;

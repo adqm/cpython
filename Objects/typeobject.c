@@ -8098,6 +8098,28 @@ object___sizeof___impl(PyObject *self)
     return PyLong_FromSsize_t(res);
 }
 
+PyObject *
+string_keys(PyObject *dict) {
+    PyObject *newlist = PyList_New(0);
+    if (newlist == NULL) {
+        return NULL;
+    }
+
+    PyObject *key, *val;
+    Py_ssize_t i = 0;
+
+    while (PyDict_Next(dict, &i, &key, &val)) {
+        if (PyUnicode_Check(key)) {
+            if (PyList_Append(newlist, key) < 0) {
+                Py_DECREF(newlist);
+                return NULL;
+            }
+        }
+    }
+
+    return newlist;
+}
+
 /* __dir__ for generic objects: returns __dict__, __class__,
    and recursively up the __class__.__bases__ chain.
 */
@@ -8144,7 +8166,7 @@ object___dir___impl(PyObject *self)
     if (itsclass != NULL && merge_class_dict(dict, itsclass) < 0)
         goto error;
 
-    result = PyDict_Keys(dict);
+    result = string_keys(dict);
     /* fall through */
 error:
     Py_XDECREF(itsclass);

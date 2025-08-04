@@ -69,6 +69,8 @@ PyAPI_FUNC(int) _PyStaticType_InitForExtension(
 // Export for _testinternalcapi extension.
 PyAPI_FUNC(PyObject *) _PyStaticType_GetBuiltins(void);
 
+// Export for dir implementation in Objects/object.c
+PyObject * string_keys(PyObject *dict);
 
 /* Like PyType_GetModuleState, but skips verification
  * that type is a heap type with an associated module */
