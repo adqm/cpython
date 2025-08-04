@@ -3953,7 +3953,6 @@ static int
 dict_merge(PyInterpreterState *interp, PyObject *a, PyObject *b, int override)
 {
     PyDictObject *mp, *other;
-
     assert(0 <= override && override <= 2);
 
     /* We accept for the argument either a concrete dictionary object,
@@ -3974,6 +3973,15 @@ dict_merge(PyInterpreterState *interp, PyObject *a, PyObject *b, int override)
         res = dict_dict_merge(interp, (PyDictObject *)a, other, override);
         ASSERT_CONSISTENT(a);
         Py_END_CRITICAL_SECTION2();
+        return res;
+    }
+
+    int has_keys = PyObject_HasAttrWithError(b, &_Py_ID(keys));
+    if (has_keys < 0){
+        return -1;
+    }
+    if (!has_keys){
+        res = PyDict_MergeFromSeq2(a, b, override);
         return res;
     }
     else {
