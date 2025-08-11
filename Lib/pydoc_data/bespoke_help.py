@@ -17,13 +17,16 @@ import random
 
 def _help_pip():
     out = io.StringIO()
-    print("""\
+    print(
+        """\
 pip is the package installer for Python. You can use it to install packages
 from the Python Package Index and other indexes.
 
 For information about using pip, see:
     https://pip.pypa.io/en/stable/getting-started/
-""".rstrip(), file=out)
+""".rstrip(),
+        file=out,
+    )
 
     try:
         import pip
