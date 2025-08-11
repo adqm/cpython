@@ -1,0 +1,18 @@
+__name__ is a special variable attached to certain objects.
+
+1. module.__name__ represents the name of the associated module.
+   For example:
+
+       >>> import math
+       >>> math.__name__
+       'math'
+
+   If the module is run as the main module the value is "__main__",
+   which provides an idiom for detecting whether a module has been run
+   directly, versus imported (see below).
+
+2. cls.__name__ represents the name that the class cls was given at
+   definition time.
+
+3. func.__name__ represents the name that the function func was given at
+   definition time.

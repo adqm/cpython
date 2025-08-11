@@ -1884,6 +1884,13 @@ regen-limited-abi: all
 regen-unicodedata:
 	$(PYTHON_FOR_REGEN) $(srcdir)/Tools/unicode/makeunicodedata.py
 
+############################################################################
+# Regenerate bespoke strings for help()
+
+.PHONY: regen-bespoke-help
+regen-bespoke-help:
+	$(PYTHON_FOR_REGEN) $(srcdir)/Tools/pydoc/make_bespoke_help.py
+
 
 ############################################################################
 # Regenerate all generated files
@@ -1893,7 +1900,7 @@ regen-unicodedata:
 regen-all: regen-cases regen-typeslots \
 	regen-token regen-ast regen-keyword regen-sre regen-frozen \
 	regen-pegen-metaparser regen-pegen regen-test-frozenmain \
-	regen-test-levenshtein regen-global-objects
+	regen-test-levenshtein regen-global-objects regen-bespoke-help
 	@echo
 	@echo "Note: make regen-stdlib-module-names, make regen-limited-abi, "
 	@echo "make regen-configure, make regen-sbom, and make regen-unicodedata should be run manually"

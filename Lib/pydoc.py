@@ -1768,10 +1768,10 @@ def render_doc(thing, title='Python Library Documentation: %s', forceload=0,
         else:
             object = type(object)
             desc += ' object'
-    return title % desc + '\n\n' + renderer.document(object, name)
+    return title % desc + f'\n\n{extra_help}' + renderer.document(object, name)
 
 def doc(thing, title='Python Library Documentation: %s', forceload=0,
-        output=None, is_cli=False):
+        output=None, is_cli=False, extra_help=''):
     """Display text documentation, given an object or a path to an object."""
     if output is None:
         try:
@@ -1783,7 +1783,8 @@ def doc(thing, title='Python Library Documentation: %s', forceload=0,
                     what = getattr(thing, '__name__', None)
                     if not isinstance(what, str):
                         what = type(thing).__name__ + ' object'
-            pager(render_doc(thing, title, forceload), f'Help on {what!s}')
+            contents = render_doc(thing, title, forceload, extra_help=extra_help)
+            pager(contents, f'Help on {what!s}')
         except ImportError as exc:
             if is_cli:
                 raise
@@ -2094,23 +2095,40 @@ has the same effect as typing a particular string at the help> prompt.
             self.helphelp()
         elif type(request) == str:
             request = request.strip()
-            if request == 'keywords': self.listkeywords()
-            elif request == 'symbols': self.listsymbols()
-            elif request == 'topics': self.listtopics()
-            elif request == 'modules': self.listmodules()
+            try:
+                import pydoc_data.bespoke_help
+                extra_help = pydoc_data.bespoke_help.get(request)() + "\n\n"
+            except:
+                extra_help = ""
+            if request == 'keywords':
+                self.listkeywords()
+            elif request == 'symbols':
+                self.listsymbols()
+            elif request == 'topics':
+                self.listtopics()
+            elif request == 'modules':
+                self.listmodules()
             elif request[:8] == 'modules ':
                 self.listmodules(request.split()[1])
-            elif request in self.symbols: self.showsymbol(request)
+            elif request in self.symbols:
+                self.showsymbol(request, extra_help=extra_help)
             elif request in ['True', 'False', 'None']:
                 # special case these keywords since they are objects too
-                doc(eval(request), 'Help on %s:', output=self._output, is_cli=is_cli)
-            elif request in self.special: self.showtopic(request)
-            elif request in self.keywords: self.showtopic(request)
-            elif request in self.topics: self.showtopic(request)
-            elif request: doc(request, 'Help on %s:', output=self._output, is_cli=is_cli)
-            else: doc(str, 'Help on %s:', output=self._output, is_cli=is_cli)
-        elif isinstance(request, Helper): self()
-        else: doc(request, 'Help on %s:', output=self._output, is_cli=is_cli)
+                doc(eval(request), 'Help on %s:', output=self._output, is_cli=is_cli, extra_help=extra_help)
+            elif request in self.special:
+                self.showtopic(request, extra_help=extra_help)
+            elif request in self.keywords:
+                self.showtopic(request, extra_help=extra_help)
+            elif request in self.topics:
+                self.showtopic(request, extra_help=extra_help)
+            elif request:
+                doc(request, 'Help on %s:', output=self._output, is_cli=is_cli, extra_help=extra_help)
+            else:
+                doc(str, 'Help on %s:', output=self._output, is_cli=is_cli, extra_help=extra_help)
+        elif isinstance(request, Helper):
+            self()
+        else:
+            doc(request, 'Help on %s:', output=self._output, is_cli=is_cli, extra_help=extra_help)
         self.output.write('\n')
 
     def intro(self):
@@ -2130,13 +2148,17 @@ has the same effect as typing a particular string at the help> prompt.
             self.output.write('\n')
 
     def helphelp(self):
-        self.output.write("""help - Interactive Help
+        pager("""
+help - Interactive Help
 =======================
 
-Calling help() starts an interactive help session.
+The built-in help function provides interactive help.  You can make use of it
+in a few different ways:
 
-Alternatively, calling help(thing) will have one of two behaviors depending on
-the type of the argument:
+* Calling help() starts an interactive help session.
+
+* Calling help(thing) will have one of two behaviors depending on the type of
+  the argument:
 
     * If thing is a string, help(thing) prints information about the given
       topic.  For example, help("class") will provide information about the
@@ -2170,7 +2192,7 @@ Here is a list of available topics.  Enter any topic name to get more help.
 ''')
         self.list(self.topics.keys(), columns=3)
 
-    def showtopic(self, topic, more_xrefs=''):
+    def showtopic(self, topic, more_xrefs='', extra_help=''):
         try:
             import pydoc_data.topics
         except ImportError:
@@ -2184,11 +2206,12 @@ module "pydoc_data.topics" could not be found.
             self.output.write('no documentation found for %s\n' % repr(topic))
             return
         if isinstance(target, str):
-            return self.showtopic(target, more_xrefs)
+            return self.showtopic(target, more_xrefs, extra_help=extra_help)
 
+        doc = extra_help
         label, xrefs = target
         try:
-            doc = pydoc_data.topics.topics[label]
+            doc += pydoc_data.topics.topics[label]
         except KeyError:
             self.output.write('no documentation found for %s\n' % repr(topic))
             return
@@ -2232,10 +2255,10 @@ module "pydoc_data.topics" could not be found.
             xrefs = (xrefs or '') + ' ' + more_xrefs
         return doc, xrefs
 
-    def showsymbol(self, symbol):
+    def showsymbol(self, symbol, extra_help=''):
         target = self.symbols[symbol]
         topic, _, xrefs = target.partition(' ')
-        self.showtopic(topic, xrefs)
+        self.showtopic(topic, xrefs, extra_help=extra_help)
 
     def listmodules(self, key=''):
         if key:

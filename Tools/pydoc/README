@@ -1,0 +1,25 @@
+Support for Custom Help Text in Built-in help Function
+======================================================
+
+The built-in help function primarily grabs from Python's docs (see the Doc
+folder).  The files in this directory are used to generate
+pydoc_data.bespoke_help, which is used to provide additional specialized
+information about certain topics (as a foreword of sorts).
+
+To add new bespoke help text, you have a few options:
+
+  * Adding a plain-text file containing help text to
+    Tools/pydoc/bespoke/topics/MY_TOPIC.txt will cause that text to show up
+    verbatim when help("MY_TOPIC") is invoked.
+
+  * Adding a function _help_MY_TOPIC() to Tools/pydoc/bespoke/base.py
+    will cause that function to be called when help("MY_TOPIC") is invoked.
+    Your function should return a string, and that string will be shown
+    verbatim.
+
+  * Adding a nullary function as the value associated with the key "MY_TOPIC"
+    in _symbol_lookup in Tools/pydocs/bespoke/base.py will cause that function
+    to be called when help("MY_TOPIC") is invoked.  As above, your function
+    should return a string, which will be shown verbatim.  This option is
+    provided as a way to add bespoke help text for topics that aren't valid
+    Python variable names (or filenames) such as "<".
