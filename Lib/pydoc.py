@@ -1733,7 +1733,7 @@ def resolve(thing, forceload=0):
     """Given an object or a path to an object, get the object and its name."""
     if isinstance(thing, str):
         object = locate(thing, forceload)
-        if object is None:
+        if object is None and thing != 'pip':
             raise ImportError('''\
 No Python documentation found for %r.
 Use help() to get the interactive help utility.
@@ -1744,11 +1744,14 @@ Use help(str) for help on the str class.''' % thing)
         return thing, name if isinstance(name, str) else None
 
 def render_doc(thing, title='Python Library Documentation: %s', forceload=0,
-        renderer=None):
+        renderer=None, extra_help=''):
     """Render text documentation, given an object or a path to an object."""
     if renderer is None:
         renderer = text
     object, name = resolve(thing, forceload)
+    if thing == 'pip' and not object:
+        # pip not installed? just treat it as though it was a topic.
+        return title % 'pip' + f'\n\n{extra_help}'
     desc = describe(object)
     module = inspect.getmodule(object)
     if name and '.' in name:
