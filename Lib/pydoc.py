@@ -1955,7 +1955,7 @@ class Helper:
         'ELLIPSIS': ('bltin-ellipsis-object', 'SLICINGS'),
         'SPECIALATTRIBUTES': ('specialattrs', ''),
         'CLASSES': ('types', 'class SPECIALMETHODS PRIVATENAMES'),
-        'MODULES': ('typesmodules', 'import'),
+        'MODULES': ('typesmodules', 'import __name__'),
         'PACKAGES': 'import',
         'EXPRESSIONS': ('operator-summary', 'lambda or and not in is BOOLEAN '
                         'COMPARISON BITWISE SHIFTING BINARY FORMATTING POWER '
@@ -2016,6 +2016,11 @@ class Helper:
         'TRUTHVALUE': ('truth', 'if while and or not BASICMETHODS'),
         'DEBUGGING': ('debugger', 'pdb'),
         'CONTEXTMANAGERS': ('context-managers', 'with'),
+    }
+
+    special = {
+        '__main__': ('__main__',  'import MODULES __name__'),
+        '__name__': ('name_equals_main', 'MODULES'),
     }
 
     def __init__(self, input=None, output=None):
@@ -2097,6 +2102,7 @@ has the same effect as typing a particular string at the help> prompt.
             elif request in ['True', 'False', 'None']:
                 # special case these keywords since they are objects too
                 doc(eval(request), 'Help on %s:', output=self._output, is_cli=is_cli)
+            elif request in self.special: self.showtopic(request)
             elif request in self.keywords: self.showtopic(request)
             elif request in self.topics: self.showtopic(request)
             elif request: doc(request, 'Help on %s:', output=self._output, is_cli=is_cli)
@@ -2152,7 +2158,7 @@ Sorry, topic and keyword documentation is not available because the
 module "pydoc_data.topics" could not be found.
 ''')
             return
-        target = self.topics.get(topic, self.keywords.get(topic))
+        target = self.topics.get(topic, self.keywords.get(topic, self.special.get(topic)))
         if not target:
             self.output.write('no documentation found for %s\n' % repr(topic))
             return
@@ -2223,16 +2229,16 @@ If there are any, enter a module name to get more help.
 Please wait a moment while I gather a list of all available modules...
 
 ''')
-            modules = {}
+            modules = {'__main__'}
             def callback(path, modname, desc, modules=modules):
                 if modname and modname[-9:] == '.__init__':
                     modname = modname[:-9] + ' (package)'
                 if modname.find('.') < 0:
-                    modules[modname] = 1
+                    modules.add(modname)
             def onerror(modname):
                 callback(None, modname, None)
             ModuleScanner().run(callback, onerror=onerror)
-            self.list(modules.keys())
+            self.list(modules)
             self.output.write('''
 Enter any module name to get more help.  Or, type "modules spam" to search
 for modules whose name or summary contain the string "spam".
