@@ -2090,7 +2090,9 @@ has the same effect as typing a particular string at the help> prompt.
             return self.input.readline()
 
     def help(self, request, is_cli=False):
-        if isinstance(request, str):
+        if request is builtins.help or request == 'help':
+            self.helphelp()
+        elif type(request) == str:
             request = request.strip()
             if request == 'keywords': self.listkeywords()
             elif request == 'symbols': self.listsymbols()
@@ -2126,6 +2128,25 @@ has the same effect as typing a particular string at the help> prompt.
                     if col < columns - 1:
                         self.output.write(' ' + ' ' * (colw - 1 - len(items[i])))
             self.output.write('\n')
+
+    def helphelp(self):
+        self.output.write("""help - Interactive Help
+=======================
+
+Calling help() starts an interactive help session.
+
+Alternatively, calling help(thing) will have one of two behaviors depending on
+the type of the argument:
+
+    * If thing is a string, help(thing) prints information about the given
+      topic.  For example, help("class") will provide information about the
+      "class" keyword, and help("math.sqrt") will provide information about
+      the "math.sqrt" function.
+
+    * If thing is not a string, help(thing) prints information about
+      thing's type.  For example, help(20) will provide information about
+      the int type.
+""")
 
     def listkeywords(self):
         self.output.write('''
