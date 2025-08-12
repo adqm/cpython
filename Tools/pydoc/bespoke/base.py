@@ -1,60 +1,47 @@
+import textwrap
+
+# utility functions
+
+
 def get(name):
     direct_lookup = globals().get(f"_help_{name}", None)
     if direct_lookup is not None:
         return direct_lookup
 
-    return _symbol_lookup.get(name, lambda: "")
+    return _symbol_lookup.get(name, None)
 
 
-# functions for programmatically-generated help text
+def external(name=None, description=None, usage_url=None, install_url=None):
+    def _external_help():
+        out = [description.strip()]
+        if usage_url is not None:
+            out.append(
+                f"For information about using {name}, see:\n    {usage_url}"
+            )
+        try:
+            __import__(name)
+        except ImportError:
+            if install_url is not None:
+                out.append(
+                    textwrap.dedent(f"""\
+                    You do not currently have {name} installed for this version of Python.
+                    For information about installing {name}, see:
+                        {install_url}
+                """)
+                )
+        return "\n\n".join(s.strip() for s in out if s is not None)
 
-import io
-import os
-import sys
-import random
-
-
-def _help_pip():
-    out = io.StringIO()
-    print(
-        """\
-pip is the package installer for Python. You can use it to install packages
-from the Python Package Index and other indexes.
-
-For information about using pip, see:
-    https://pip.pypa.io/en/stable/getting-started/
-""".rstrip(),
-        file=out,
-    )
-
-    try:
-        import pip
-    except ImportError:
-        print(
-            """
-
-It does not appear that you have pip available.  For information about
-installing pip, see:
-    https://pip.pypa.io/en/stable/installation/
-""".rstrip(),
-            file=out,
-        )
-
-    return out.getvalue()
+    return _external_help
 
 
-def _help_venv():
-    return f"""\
-The venv module supports creating lightweight "virtual environments", each with
-their own independent set of Python packages installed in their site
-directories. A virtual environment is created on top of an existing Python
-installation, known as the virtual environment's "base" Python, and by default
-is isolated from the packages in the base environment, so that only those
-explicitly installed in the virtual environment are available.
+# specific help functions
+# def help_MY_TOPIC() -> str:
+#   ...
 
-Virtual environments are created by executing the venv module:
-    $ {os.path.basename(sys.executable)} -m venv /path/to/new/virtual/environment
-""".rstrip()
 
-# lookup table for symbols that can't be listed as names
+# a place to add symbols that can't be represented by filenames
+# _symbol_lookup['MY_TOPIC'] = lambda() ->str: ...
 _symbol_lookup = {}
+
+
+# auto-generated help functions
