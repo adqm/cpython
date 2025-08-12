@@ -2138,7 +2138,7 @@ has the same effect as typing a particular string at the help> prompt.
         elif isinstance(request, Helper):
             self()
         else:
-            doc(request, 'Help on %s:', output=self._output, is_cli=is_cli, extra_help=extra_help)
+            doc(request, 'Help on %s:', output=self._output, is_cli=is_cli, extra_help=None)
         self.output.write('\n')
 
     def intro(self):
