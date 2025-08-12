@@ -46,6 +46,7 @@ help:
 	@echo "  coverage   to check documentation coverage for library and C API"
 	@echo "  doctest    to run doctests in the documentation"
 	@echo "  pydoc-topics  to regenerate the pydoc topics file"
+	@echo "  pydoc-library  to regenerate the pydoc library summary file"
 	@echo "  dist       to create a \"dist\" directory with archived docs for download"
 	@echo "  check      to run a check for frequent markup errors"
 
@@ -141,6 +142,12 @@ pydoc-topics: BUILDER = pydoc-topics
 pydoc-topics: build
 	@echo "Building finished; now run this:" \
 	      "cp build/pydoc-topics/topics.py ../Lib/pydoc_data/topics.py"
+
+.PHONY: pydoc-library
+pydoc-library: BUILDER = pydoc-library
+pydoc-library: build
+	@echo "Building finished; now run this:" \
+	      "cp build/pydoc-library/library.py ../Lib/pydoc_data/library.py"
 
 .PHONY: gettext
 gettext: BUILDER = gettext
