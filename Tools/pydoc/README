@@ -6,7 +6,7 @@ folder).  The files in this directory are used to generate
 pydoc_data.bespoke_help, which is used to provide additional specialized
 information about certain topics (as a foreword of sorts).
 
-To add new bespoke help text, you have a few options:
+To add new bespoke help text for a given topic, you have a few options:
 
   * Adding a plain-text file containing help text to
     Tools/pydoc/bespoke/topics/MY_TOPIC.txt will cause that text to show up
@@ -23,3 +23,16 @@ To add new bespoke help text, you have a few options:
     should return a string, which will be shown verbatim.  This option is
     provided as a way to add bespoke help text for topics that aren't valid
     Python variable names (or filenames) such as "<".
+
+For documenting common external packages, you can instead put details of the
+package in Tools/pydocs/bespoke/external/MY_TOPIC.toml containing information
+about the package.  For example, to document pip, we could add the following to
+pip.toml:
+
+    name = "pip"
+    description = """
+    pip is the package installer for Python. You can use it to install
+    packages from the Python Package Index and other indexes.
+    """
+    usage_url = "https://pip.pypa.io/en/stable/getting-started/"
+    install_url = "https://pip.pypa.io/en/stable/installation/"
