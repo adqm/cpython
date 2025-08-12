@@ -11,13 +11,11 @@ def get(name):
     return _symbol_lookup.get(name, None)
 
 
-def external(name=None, description=None, usage_url=None, install_url=None):
+def external(name=None, description=None, url=None, install_url=None):
     def _external_help():
         out = [description.strip()]
-        if usage_url is not None:
-            out.append(
-                f"For information about using {name}, see:\n    {usage_url}"
-            )
+        if url is not None:
+            out.append(f"For information about {name}, see:\n    {url}")
         try:
             __import__(name)
         except ImportError:

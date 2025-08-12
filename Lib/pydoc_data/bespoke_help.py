@@ -14,13 +14,11 @@ def get(name):
     return _symbol_lookup.get(name, None)
 
 
-def external(name=None, description=None, usage_url=None, install_url=None):
+def external(name=None, description=None, url=None, install_url=None):
     def _external_help():
         out = [description.strip()]
-        if usage_url is not None:
-            out.append(
-                f"For information about using {name}, see:\n    {usage_url}"
-            )
+        if url is not None:
+            out.append(f"For information about {name}, see:\n    {url}")
         try:
             __import__(name)
         except ImportError:
@@ -67,11 +65,25 @@ def _help___name__():
 2. If obj is a class, function, method, descriptor, or generator, then
    obj.__name__ represents the name that the class cls was given at
    definition time.'''
+
+def _help_tutorial():
+    return r'''If you are new to Python (but not new to programming in general), a
+tutorial is available online that introduces the basic concepts and
+features of the Python language and system:
+
+    https://docs.python.org/tutorial'''
+_help_numpy = external(
+    name=r'''numpy''',
+    description=r'''NumPy is a popular package for numerical/scientific computing in Python.
+''',
+    url=r'''https://numpy.org/''',
+    install_url=r'''https://numpy.org/install/''',
+)
 _help_pip = external(
     name=r'''pip''',
     description=r'''pip is the package installer for Python. You can use it to install
 packages from the Python Package Index and other indexes.
 ''',
-    usage_url=r'''https://pip.pypa.io/en/stable/getting-started/''',
+    url=r'''https://pip.pypa.io/''',
     install_url=r'''https://pip.pypa.io/en/stable/installation/''',
 )

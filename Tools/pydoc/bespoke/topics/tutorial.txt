@@ -1,0 +1,5 @@
+If you are new to Python (but not new to programming in general), a
+tutorial is available online that introduces the basic concepts and
+features of the Python language and system:
+
+    https://docs.python.org/tutorial

@@ -1,0 +1,6 @@
+name = "numpy"
+description = """
+NumPy is a popular package for numerical/scientific computing in Python.
+"""
+url = "https://numpy.org/"
+install_url = "https://numpy.org/install/"
