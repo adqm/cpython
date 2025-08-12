@@ -12,6 +12,8 @@ def get(name):
 # functions for programmatically-generated help text
 
 import io
+import os
+import sys
 import random
 
 
@@ -43,6 +45,19 @@ installing pip, see:
 
     return out.getvalue()
 
+
+def _help_venv():
+    return f"""\
+The venv module supports creating lightweight "virtual environments", each with
+their own independent set of Python packages installed in their site
+directories. A virtual environment is created on top of an existing Python
+installation, known as the virtual environment's "base" Python, and by default
+is isolated from the packages in the base environment, so that only those
+explicitly installed in the virtual environment are available.
+
+Virtual environments are created by executing the venv module:
+    $ {sys.executable} -m venv /path/to/new/virtual/environment
+""".rstrip()
 
 # lookup table for symbols that can't be listed as names
 _symbol_lookup = {}
