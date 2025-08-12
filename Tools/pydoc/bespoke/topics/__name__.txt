@@ -9,10 +9,8 @@ __name__ is a special variable attached to certain objects.
 
    If the module is run as the main module the value is "__main__",
    which provides an idiom for detecting whether a module has been run
-   directly, versus imported (see below).
+   directly, versus imported, by checking if __name__ == "__main__"
 
-2. cls.__name__ represents the name that the class cls was given at
-   definition time.
-
-3. func.__name__ represents the name that the function func was given at
+2. If obj is a class, function, method, descriptor, or generator, then
+   obj.__name__ represents the name that the class cls was given at
    definition time.
