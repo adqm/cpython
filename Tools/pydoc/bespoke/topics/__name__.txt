@@ -1,4 +1,4 @@
-__name__ is a special variable attached to certain objects.
+__name__ is a special attribute of certain objects.
 
 1. module.__name__ represents the name of the associated module.
    For example:
@@ -12,5 +12,14 @@ __name__ is a special variable attached to certain objects.
    directly, versus imported, by checking if __name__ == "__main__"
 
 2. If obj is a class, function, method, descriptor, or generator, then
-   obj.__name__ represents the name that the class cls was given at
-   definition time.
+   obj.__name__ represents the name that obj was given at definition
+   time.  For example:
+
+       >>> def foo():
+       ...     return 42
+       ...
+       >>> foo.__name__
+       "foo"
+       >>> bar = foo
+       >>> bar.__name__
+       "foo"

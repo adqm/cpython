@@ -49,7 +49,7 @@ _symbol_lookup = {}
 
 
 def _help___name__():
-    return r'''__name__ is a special variable attached to certain objects.
+    return r'''__name__ is a special attribute of certain objects.
 
 1. module.__name__ represents the name of the associated module.
    For example:
@@ -63,8 +63,17 @@ def _help___name__():
    directly, versus imported, by checking if __name__ == "__main__"
 
 2. If obj is a class, function, method, descriptor, or generator, then
-   obj.__name__ represents the name that the class cls was given at
-   definition time.'''
+   obj.__name__ represents the name that obj was given at definition
+   time.  For example:
+
+       >>> def foo():
+       ...     return 42
+       ...
+       >>> foo.__name__
+       "foo"
+       >>> bar = foo
+       >>> bar.__name__
+       "foo"'''
 
 def _help_tutorial():
     return r'''If you are new to Python (but not new to programming in general), a
