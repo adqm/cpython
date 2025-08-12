@@ -2162,22 +2162,21 @@ has the same effect as typing a particular string at the help> prompt.
 help - Interactive Help
 =======================
 
-The built-in help function provides interactive help.  You can make use of it
-in a few different ways:
+The built-in help function provides interactive help.  You can make use
+of it in a few different ways:
 
 * Calling help() starts an interactive help session.
 
-* Calling help(thing) will have one of two behaviors depending on the type of
-  the argument:
+* Calling help(x) will have one of two behaviors depending on the type
+  of the argument:
 
-    * If thing is a string, help(thing) prints information about the given
-      topic.  For example, help("class") will provide information about the
-      "class" keyword, and help("math.sqrt") will provide information about
-      the "math.sqrt" function.
+    * If x is a string, help(x) prints information about the given
+      topic.  For example, help("class") will provide information about
+      the "class" keyword, and help("math.sqrt") will provide
+      information about the "math.sqrt" function.
 
-    * If thing is not a string, help(thing) prints information about
-      thing's type.  For example, help(20) will provide information about
-      the int type.
+    * If x is not a string, help(x) prints information about x's type.
+      For example, help(20) will provide information about the int type.
 """)
 
     def listkeywords(self):
