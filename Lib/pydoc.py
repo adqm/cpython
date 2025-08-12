@@ -2103,6 +2103,13 @@ has the same effect as typing a particular string at the help> prompt.
                 extra_help = pydoc_data.bespoke_help.get(request)() + "\n\n"
             except:
                 extra_help = ""
+            try:
+                import pydoc_data.library
+                if request in pydoc_data.library.library:
+                    link = f"https://docs.python.org/{sys.version_info[0]}.{sys.version_info[1]}/library/{request}.html"
+                    extra_help += f"{pydoc_data.library.library[request]}\n\nFull documentation: {link}\n\n"
+            except:
+                pass
             if request == 'keywords':
                 self.listkeywords()
             elif request == 'symbols':
