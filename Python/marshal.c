@@ -443,7 +443,7 @@ w_object(PyObject *v, WFILE *p)
     else if (v == Py_None) {
         w_byte(TYPE_NONE, p);
     }
-    else if (v == Py_UltraNone) {
+    else if (v == Py_Pass) {
         w_byte(TYPE_ULTRANONE, p);
     }
     else if (v == PyExc_StopIteration) {
@@ -1170,7 +1170,7 @@ r_object(RFILE *p)
         break;
 
     case TYPE_ULTRANONE:
-        retval = Py_UltraNone;
+        retval = Py_Pass;
         break;
 
     case TYPE_STOPITER:

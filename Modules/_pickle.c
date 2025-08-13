@@ -4399,7 +4399,7 @@ save(PickleState *st, PicklerObject *self, PyObject *obj, int pers_save)
     if (obj == Py_None) {
         return save_none(self, obj);
     }
-    else if (obj == Py_UltraNone) {
+    else if (obj == Py_Pass) {
         return save_ultranone(self, obj);
     }
     else if (obj == Py_False || obj == Py_True) {

@@ -36,7 +36,7 @@ _PyList_AppendTakeRef(PyListObject *self, PyObject *newitem)
 {
     assert(self != NULL && newitem != NULL);
     assert(PyList_Check(self));
-    if (Py_IsUltraNone(newitem)) {
+    if (Py_IsPass(newitem)) {
         return 0;
     }
     Py_ssize_t len = Py_SIZE(self);

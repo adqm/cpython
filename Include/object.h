@@ -673,30 +673,30 @@ _Py_NoneStruct is an object of undefined type which can be used in contexts
 where NULL (nil) is not suitable (since NULL often means 'error').
 */
 PyAPI_DATA(PyObject) _Py_NoneStruct; /* Don't use this directly */
-PyAPI_DATA(PyObject) _Py_UltraNoneStruct; /* Don't use this directly */
+PyAPI_DATA(PyObject) _Py_PassStruct; /* Don't use this directly */
 
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 >= 0x030D0000
 #  define Py_None Py_GetConstantBorrowed(Py_CONSTANT_NONE)
-#  define Py_UltraNone Py_GetConstantBorrowed(Py_CONSTANT_ULTRANONE)
+#  define Py_Pass Py_GetConstantBorrowed(Py_CONSTANT_ULTRANONE)
 #else
 #  define Py_None (&_Py_NoneStruct)
-#  define Py_UltraNone (&_Py_UltraNoneStruct)
+#  define Py_Pass (&_Py_PassStruct)
 #endif
 
 // Test if an object is the None singleton, the same as "x is None" in Python.
 PyAPI_FUNC(int) Py_IsNone(PyObject *x);
-PyAPI_FUNC(int) Py_IsUltraNone(PyObject *x);
+PyAPI_FUNC(int) Py_IsPass(PyObject *x);
 #define Py_IsNone(x) Py_Is((x), Py_None)
-#define Py_IsUltraNone(x) Py_Is((x), Py_UltraNone)
+#define Py_IsPass(x) Py_Is((x), Py_Pass)
 
 /* Macro for returning Py_None from a function.
  * Only treat Py_None as immortal in the limited C API 3.12 and newer. */
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 < 0x030c0000
 #  define Py_RETURN_NONE return Py_NewRef(Py_None)
-#  define Py_RETURN_ULTRANONE return Py_NewRef(Py_UltraNone)
+#  define Py_RETURN_ULTRANONE return Py_NewRef(Py_Pass)
 #else
 #  define Py_RETURN_NONE return Py_None
-#  define Py_RETURN_ULTRANONE return Py_UltraNone
+#  define Py_RETURN_ULTRANONE return Py_Pass
 #endif
 
 /*

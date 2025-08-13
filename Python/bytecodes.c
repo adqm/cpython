@@ -3713,12 +3713,12 @@ dummy_func(
                 total_args++;
             }
 
-            // filter out UltraNone args
+            // filter out Pass args
             _PyStackRef filtered_args[total_args];
             int nargs_out = 0;
             for (int i = 0; i < total_args; i++) {
                 PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
-                if (Py_IsUltraNone(arg)){
+                if (Py_IsPass(arg)){
                     Py_DECREF(arg);
                 }
                 else {
@@ -4636,12 +4636,12 @@ dummy_func(
             PyObject *temp_new_kwnames = PyList_New(num_kwargs);
             int num_new_kwargs = 0;
 
-            // filter out UltraNone args
+            // filter out Pass args
             _PyStackRef filtered_args[total_args];
             int nargs_out = 0;
             for (int i = 0; i < total_args; i++) {
                 PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
-                if (Py_IsUltraNone(arg)){
+                if (Py_IsPass(arg)){
                     Py_DECREF(arg);
                 }
                 else {

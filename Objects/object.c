@@ -2311,7 +2311,7 @@ PyTypeObject _PyNone_Type = {
 PyObject _Py_NoneStruct = _PyObject_HEAD_INIT(&_PyNone_Type);
 
 /*
-UltraNone is a non-NULL undefined value.
+Pass is a non-NULL undefined value.
 There is (and should be!) no way to create other objects of this type,
 so there is exactly one (which is indestructible, by the way).
 */
@@ -2320,14 +2320,14 @@ so there is exactly one (which is indestructible, by the way).
 static PyObject *
 ultranone_repr(PyObject *op)
 {
-    return PyUnicode_FromString("/");
+    return PyUnicode_FromString("pass");
 }
 
 static PyObject *
 ultranone_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
     if (PyTuple_GET_SIZE(args) || (kwargs && PyDict_GET_SIZE(kwargs))) {
-        PyErr_SetString(PyExc_TypeError, "UltraNoneType takes no arguments");
+        PyErr_SetString(PyExc_TypeError, "PassType takes no arguments");
         return NULL;
     }
     Py_RETURN_ULTRANONE;
@@ -2339,13 +2339,13 @@ static Py_hash_t ultranone_hash(PyObject *v)
 }
 
 PyDoc_STRVAR(ultranone_doc,
-"UltraNoneType()\n"
+"PassType()\n"
 "--\n\n"
-"The type of the UltraNone singleton.");
+"The type of the Pass singleton.");
 
-PyTypeObject _PyUltraNone_Type = {
+PyTypeObject _PyPass_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    "UltraNoneType",
+    "PassType",
     0,
     0,
     none_dealloc,       /*tp_dealloc*/
@@ -2384,7 +2384,7 @@ PyTypeObject _PyUltraNone_Type = {
     ultranone_new,           /*tp_new */
 };
 
-PyObject _Py_UltraNoneStruct = _PyObject_HEAD_INIT(&_PyUltraNone_Type);
+PyObject _Py_PassStruct = _PyObject_HEAD_INIT(&_PyPass_Type);
 
 
 /* NotImplemented is an object that can be used to signal that an
@@ -3391,7 +3391,7 @@ static PyObject* constants[] = {
     NULL,  // Py_CONSTANT_EMPTY_STR
     NULL,  // Py_CONSTANT_EMPTY_BYTES
     NULL,  // Py_CONSTANT_EMPTY_TUPLE
-    &_Py_UltraNoneStruct,              // Py_CONSTANT_ULTRANONE
+    &_Py_PassStruct,              // Py_CONSTANT_ULTRANONE
 };
 
 void

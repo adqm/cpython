@@ -1217,7 +1217,7 @@ list_extend_fast(PyListObject *self, PyObject *iterable)
     PyObject **dest = self->ob_item + m;
     for (Py_ssize_t i = 0; i < n; i++) {
         PyObject *o = src[i];
-        if (Py_IsUltraNone(o)) {
+        if (Py_IsPass(o)) {
             skipped++;
             continue;
         }
@@ -1277,7 +1277,7 @@ list_extend_iter_lock_held(PyListObject *self, PyObject *iterable)
             break;
         }
 
-        if (Py_IsUltraNone(item)) {
+        if (Py_IsPass(item)) {
             continue;
         }
         if (Py_SIZE(self) < self->allocated) {
@@ -1339,7 +1339,7 @@ list_extend_set(PyListObject *self, PySetObject *other)
     PyObject **dest = self->ob_item + m;
     Py_ssize_t skipped = 0;
     while (_PySet_NextEntryRef((PyObject *)other, &setpos, &key, &hash)) {
-        if (Py_IsUltraNone(key)) {
+        if (Py_IsPass(key)) {
             skipped++;
             continue;
         }
@@ -1371,7 +1371,7 @@ list_extend_dict(PyListObject *self, PyDictObject *dict, int which_item)
     Py_ssize_t skipped = 0;
     while (_PyDict_Next((PyObject *)dict, &pos, &keyvalue[0], &keyvalue[1], NULL)) {
         PyObject *obj = keyvalue[which_item];
-        if (Py_IsUltraNone(obj)) {
+        if (Py_IsPass(obj)) {
             skipped++;
             continue;
         }
@@ -3279,7 +3279,7 @@ _PyList_FromStackRefStealOnSuccess(const _PyStackRef *src, Py_ssize_t n)
     Py_ssize_t skipped = 0;
     for (Py_ssize_t i = 0; i < n; i++) {
         PyObject *item = PyStackRef_AsPyObjectSteal(src[i]);
-        if (Py_IsUltraNone(item)) {
+        if (Py_IsPass(item)) {
             skipped++;
             continue;
         }

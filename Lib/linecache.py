@@ -247,6 +247,8 @@ def _register_code(code, string, name):
     while stack:
         code = stack.pop()
         for const in code.co_consts:
+            if const is pass:  # pass is weird as an argument to a function; skip it
+                continue
             if isinstance(const, type(code)):
                 stack.append(const)
         key = _make_key(code)

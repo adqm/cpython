@@ -37,7 +37,7 @@ class GetConstantTest(unittest.TestCase):
         self.assertIs(get_constant(Constant.Py_CONSTANT_TRUE), True)
         self.assertIs(get_constant(Constant.Py_CONSTANT_ELLIPSIS), Ellipsis)
         self.assertIs(get_constant(Constant.Py_CONSTANT_NOT_IMPLEMENTED), NotImplemented)
-        self.assertIs(get_constant(Constant.Py_CONSTANT_ULTRANONE), UltraNone)
+        self.assertIs(get_constant(Constant.Py_CONSTANT_ULTRANONE), Pass)
 
         for constant_id, constant_type, value in (
             (Constant.Py_CONSTANT_ZERO, int, 0),

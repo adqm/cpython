@@ -1572,7 +1572,7 @@
                 int nargs_out = 0;
                 for (int i = 0; i < total_args; i++) {
                     PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
-                    if (Py_IsUltraNone(arg)){
+                    if (Py_IsPass(arg)){
                         stack_pointer[-2 - oparg] = callable;
                         stack_pointer[-1 - oparg] = self_or_null;
                         _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -2889,7 +2889,7 @@
                 int nargs_out = 0;
                 for (int i = 0; i < total_args; i++) {
                     PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
-                    if (Py_IsUltraNone(arg)){
+                    if (Py_IsPass(arg)){
                         _PyFrame_SetStackPointer(frame, stack_pointer);
                         Py_DECREF(arg);
                         stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -6358,7 +6358,7 @@
                 int nargs_out = 0;
                 for (int i = 0; i < total_args; i++) {
                     PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
-                    if (Py_IsUltraNone(arg)){
+                    if (Py_IsPass(arg)){
                         _PyFrame_SetStackPointer(frame, stack_pointer);
                         Py_DECREF(arg);
                         stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -6731,7 +6731,7 @@
                 int nargs_out = 0;
                 for (int i = 0; i < total_args; i++) {
                     PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
-                    if (Py_IsUltraNone(arg)){
+                    if (Py_IsPass(arg)){
                         _PyFrame_SetStackPointer(frame, stack_pointer);
                         Py_DECREF(arg);
                         stack_pointer = _PyFrame_GetStackPointer(frame);

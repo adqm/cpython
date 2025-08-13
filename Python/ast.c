@@ -57,6 +57,7 @@ validate_name(PyObject *name)
         "None",
         "True",
         "False",
+        "pass",
         NULL
     };
     for (int i = 0; forbidden[i] != NULL; i++) {
@@ -157,7 +158,7 @@ static int
 validate_constant(PyObject *value)
 {
     assert(!PyErr_Occurred());
-    if (value == Py_None || value == Py_Ellipsis || value == Py_UltraNone)
+    if (value == Py_None || value == Py_Ellipsis || value == Py_Pass)
         return 1;
 
     if (PyLong_CheckExact(value)
