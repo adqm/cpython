@@ -2318,13 +2318,13 @@ so there is exactly one (which is indestructible, by the way).
 
 /* ARGSUSED */
 static PyObject *
-ultranone_repr(PyObject *op)
+pass_repr(PyObject *op)
 {
     return PyUnicode_FromString("pass");
 }
 
 static PyObject *
-ultranone_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
+pass_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
     if (PyTuple_GET_SIZE(args) || (kwargs && PyDict_GET_SIZE(kwargs))) {
         PyErr_SetString(PyExc_TypeError, "PassType takes no arguments");
@@ -2333,12 +2333,12 @@ ultranone_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     Py_RETURN_ULTRANONE;
 }
 
-static Py_hash_t ultranone_hash(PyObject *v)
+static Py_hash_t pass_hash(PyObject *v)
 {
-    return 0xFCA86421;
+    return 0x70617373;
 }
 
-PyDoc_STRVAR(ultranone_doc,
+PyDoc_STRVAR(pass_doc,
 "PassType()\n"
 "--\n\n"
 "The type of the Pass singleton.");
@@ -2353,18 +2353,18 @@ PyTypeObject _PyPass_Type = {
     0,                  /*tp_getattr*/
     0,                  /*tp_setattr*/
     0,                  /*tp_as_async*/
-    ultranone_repr,          /*tp_repr*/
+    pass_repr,          /*tp_repr*/
     &none_as_number,    /*tp_as_number*/
     0,                  /*tp_as_sequence*/
     0,                  /*tp_as_mapping*/
-    ultranone_hash,          /*tp_hash */
+    pass_hash,          /*tp_hash */
     0,                  /*tp_call */
     0,                  /*tp_str */
     0,                  /*tp_getattro */
     0,                  /*tp_setattro */
     0,                  /*tp_as_buffer */
     Py_TPFLAGS_DEFAULT, /*tp_flags */
-    ultranone_doc,           /*tp_doc */
+    pass_doc,           /*tp_doc */
     0,                  /*tp_traverse */
     0,                  /*tp_clear */
     _Py_BaseObject_RichCompare, /*tp_richcompare */
@@ -2381,7 +2381,7 @@ PyTypeObject _PyPass_Type = {
     0,                  /*tp_dictoffset */
     0,                  /*tp_init */
     0,                  /*tp_alloc */
-    ultranone_new,           /*tp_new */
+    pass_new,           /*tp_new */
 };
 
 PyObject _Py_PassStruct = _PyObject_HEAD_INIT(&_PyPass_Type);
