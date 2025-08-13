@@ -1466,6 +1466,7 @@ fold_tuple_of_constants(basicblock *bb, int i, PyObject *consts, PyObject *const
         return ERROR;
     }
 
+    Py_ssize_t out_i = 0;
     for (int i = 0; i < seq_size; i++) {
         cfg_instr *inst = const_instrs[i];
         assert(loads_const(inst->i_opcode));
@@ -1474,10 +1475,14 @@ fold_tuple_of_constants(basicblock *bb, int i, PyObject *consts, PyObject *const
             Py_DECREF(const_tuple);
             return ERROR;
         }
-        PyTuple_SET_ITEM(const_tuple, i, element);
+        if (Py_IsPass(element)){
+            continue;
+        }
+        PyTuple_SET_ITEM(const_tuple, out_i++, element);
     }
 
     nop_out(const_instrs, seq_size);
+    Py_SET_SIZE(const_tuple, out_i);
     return instr_make_load_const(instr, const_tuple, consts, const_cache);
 }
 
