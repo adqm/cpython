@@ -396,11 +396,17 @@ _PyTuple_FromStackRefStealOnSuccess(const _PyStackRef *src, Py_ssize_t n)
         return NULL;
     }
     PyObject **dst = tuple->ob_item;
+    Py_ssize_t out_i = 0;
     for (Py_ssize_t i = 0; i < n; i++) {
-        dst[i] = PyStackRef_AsPyObjectSteal(src[i]);
+        PyObject *item = PyStackRef_AsPyObjectSteal(src[i]);
+        if (Py_IsPass(item)) {
+            continue;
+        }
+        dst[out_i++] = item;
     }
-    _PyObject_GC_TRACK(tuple);
-    return (PyObject *)tuple;
+    PyObject *result = (PyObject *)tuple;
+    Py_SET_SIZE(result, out_i);
+    return result;
 }
 
 PyObject *
