@@ -2320,7 +2320,7 @@ so there is exactly one (which is indestructible, by the way).
 static PyObject *
 ultranone_repr(PyObject *op)
 {
-    return PyUnicode_FromString("!");
+    return PyUnicode_FromString("/");
 }
 
 static PyObject *

@@ -536,7 +536,7 @@ _PyPegen_new_identifier(Parser *p, const char *n)
         "None",
         "True",
         "False",
-        "!",
+        "/",
         NULL
     };
     for (int i = 0; forbidden[i] != NULL; i++) {
