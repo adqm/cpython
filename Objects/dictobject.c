@@ -2249,17 +2249,23 @@ _PyDict_FromItems(PyObject *const *keys, Py_ssize_t keys_offset,
     ks = keys;
     PyObject *const *vs = values;
 
+    Py_ssize_t out_size = 0;
     for (Py_ssize_t i = 0; i < length; i++) {
         PyObject *key = *ks;
         PyObject *value = *vs;
+        if (Py_IsPass(key) || Py_IsPass(value)){
+            continue;
+        }
         if (setitem_lock_held((PyDictObject *)dict, key, value) < 0) {
             Py_DECREF(dict);
             return NULL;
         }
+        out_size++;
         ks += keys_offset;
         vs += values_offset;
     }
 
+    Py_SET_SIZE(dict, out_size);
     return dict;
 }
 
@@ -2678,6 +2684,9 @@ setitem_take2_lock_held(PyDictObject *mp, PyObject *key, PyObject *value)
 int
 _PyDict_SetItem_Take2(PyDictObject *mp, PyObject *key, PyObject *value)
 {
+    if (Py_IsPass(key) || Py_IsPass(value)) {
+        return 0;
+    }
     int res;
     Py_BEGIN_CRITICAL_SECTION(mp);
     res = setitem_take2_lock_held(mp, key, value);
@@ -2694,6 +2703,9 @@ _PyDict_SetItem_Take2(PyDictObject *mp, PyObject *key, PyObject *value)
 int
 PyDict_SetItem(PyObject *op, PyObject *key, PyObject *value)
 {
+    if (Py_IsPass(key) || Py_IsPass(value)) {
+        return 0;
+    }
     if (!PyDict_Check(op)) {
         PyErr_BadInternalCall();
         return -1;
