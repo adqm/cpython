@@ -1568,6 +1568,23 @@
                     arguments--;
                     total_args++;
                 }
+                _PyStackRef filtered_args[total_args];
+                int nargs_out = 0;
+                for (int i = 0; i < total_args; i++) {
+                    PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
+                    if (Py_IsUltraNone(arg)){
+                        stack_pointer[-2 - oparg] = callable;
+                        stack_pointer[-1 - oparg] = self_or_null;
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        Py_DECREF(arg);
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                    }
+                    else {
+                        filtered_args[nargs_out++] = arguments[i];
+                    }
+                }
+                total_args = nargs_out;
+                arguments = filtered_args;
                 if (Py_TYPE(callable_o) == &PyFunction_Type &&
                     tstate->interp->eval_frame == NULL &&
                     ((PyFunctionObject *)callable_o)->vectorcall == _PyFunction_Vectorcall)
@@ -2860,15 +2877,47 @@
                     arguments--;
                     total_args++;
                 }
-                int positional_args = total_args - (int)PyTuple_GET_SIZE(kwnames_o);
+                int num_kwargs = (int)PyTuple_GET_SIZE(kwnames_o);
+                int positional_args = total_args - num_kwargs;
+                stack_pointer[-3 - oparg] = callable;
+                stack_pointer[-2 - oparg] = self_or_null;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                PyObject *temp_new_kwnames = PyList_New(num_kwargs);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                int num_new_kwargs = 0;
+                _PyStackRef filtered_args[total_args];
+                int nargs_out = 0;
+                for (int i = 0; i < total_args; i++) {
+                    PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
+                    if (Py_IsUltraNone(arg)){
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        Py_DECREF(arg);
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                    }
+                    else {
+                        if (i >= positional_args) {
+                            _PyFrame_SetStackPointer(frame, stack_pointer);
+                            PyObject *kwname = PyTuple_GetItem(kwnames_o, i - positional_args);
+                            PyList_SetItem(temp_new_kwnames, num_new_kwargs++, kwname);
+                            stack_pointer = _PyFrame_GetStackPointer(frame);
+                        }
+                        filtered_args[nargs_out++] = arguments[i];
+                    }
+                }
+                total_args = nargs_out;
+                positional_args = nargs_out - num_new_kwargs;
+                arguments = filtered_args;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                Py_SET_SIZE(temp_new_kwnames, num_new_kwargs);
+                kwnames_o = PyList_AsTuple(temp_new_kwnames);
+                Py_DECREF(temp_new_kwnames);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (Py_TYPE(callable_o) == &PyFunction_Type &&
                     tstate->interp->eval_frame == NULL &&
                     ((PyFunctionObject *)callable_o)->vectorcall == _PyFunction_Vectorcall)
                 {
                     int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
                     PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
-                    stack_pointer[-3 - oparg] = callable;
-                    stack_pointer[-2 - oparg] = self_or_null;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
                     _PyInterpreterFrame *new_frame = _PyEvalFramePushAndInit(
                         tstate, callable, locals,
@@ -2892,8 +2941,6 @@
                     _PyFrame_SetStackPointer(frame, stack_pointer);
                     _PyStackRef tmp = kwnames;
                     kwnames = PyStackRef_NULL;
-                    stack_pointer[-3 - oparg] = callable;
-                    stack_pointer[-2 - oparg] = self_or_null;
                     stack_pointer[-1] = kwnames;
                     PyStackRef_CLOSE(tmp);
                     for (int _i = oparg; --_i >= 0;) {
@@ -2914,8 +2961,6 @@
                     assert(WITHIN_STACK_BOUNDS());
                     JUMP_TO_LABEL(error);
                 }
-                stack_pointer[-3 - oparg] = callable;
-                stack_pointer[-2 - oparg] = self_or_null;
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 PyObject *res_o = PyObject_Vectorcall(
                     callable_o, args_o,
@@ -6309,6 +6354,21 @@
                     arguments--;
                     total_args++;
                 }
+                _PyStackRef filtered_args[total_args];
+                int nargs_out = 0;
+                for (int i = 0; i < total_args; i++) {
+                    PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
+                    if (Py_IsUltraNone(arg)){
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        Py_DECREF(arg);
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                    }
+                    else {
+                        filtered_args[nargs_out++] = arguments[i];
+                    }
+                }
+                total_args = nargs_out;
+                arguments = filtered_args;
                 if (Py_TYPE(callable_o) == &PyFunction_Type &&
                     tstate->interp->eval_frame == NULL &&
                     ((PyFunctionObject *)callable_o)->vectorcall == _PyFunction_Vectorcall)
@@ -6661,7 +6721,39 @@
                     arguments--;
                     total_args++;
                 }
-                int positional_args = total_args - (int)PyTuple_GET_SIZE(kwnames_o);
+                int num_kwargs = (int)PyTuple_GET_SIZE(kwnames_o);
+                int positional_args = total_args - num_kwargs;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                PyObject *temp_new_kwnames = PyList_New(num_kwargs);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                int num_new_kwargs = 0;
+                _PyStackRef filtered_args[total_args];
+                int nargs_out = 0;
+                for (int i = 0; i < total_args; i++) {
+                    PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
+                    if (Py_IsUltraNone(arg)){
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        Py_DECREF(arg);
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                    }
+                    else {
+                        if (i >= positional_args) {
+                            _PyFrame_SetStackPointer(frame, stack_pointer);
+                            PyObject *kwname = PyTuple_GetItem(kwnames_o, i - positional_args);
+                            PyList_SetItem(temp_new_kwnames, num_new_kwargs++, kwname);
+                            stack_pointer = _PyFrame_GetStackPointer(frame);
+                        }
+                        filtered_args[nargs_out++] = arguments[i];
+                    }
+                }
+                total_args = nargs_out;
+                positional_args = nargs_out - num_new_kwargs;
+                arguments = filtered_args;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                Py_SET_SIZE(temp_new_kwnames, num_new_kwargs);
+                kwnames_o = PyList_AsTuple(temp_new_kwnames);
+                Py_DECREF(temp_new_kwnames);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (Py_TYPE(callable_o) == &PyFunction_Type &&
                     tstate->interp->eval_frame == NULL &&
                     ((PyFunctionObject *)callable_o)->vectorcall == _PyFunction_Vectorcall)

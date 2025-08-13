@@ -3712,6 +3712,23 @@ dummy_func(
                 arguments--;
                 total_args++;
             }
+
+            // filter out UltraNone args
+            _PyStackRef filtered_args[total_args];
+            int nargs_out = 0;
+            for (int i = 0; i < total_args; i++) {
+                PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
+                if (Py_IsUltraNone(arg)){
+                    Py_DECREF(arg);
+                }
+                else {
+                    filtered_args[nargs_out++] = arguments[i];
+                }
+            }
+            total_args = nargs_out;
+            arguments = filtered_args;
+
+
             // Check if the call can be inlined or not
             if (Py_TYPE(callable_o) == &PyFunction_Type &&
                 tstate->interp->eval_frame == NULL &&
@@ -4612,7 +4629,38 @@ dummy_func(
                 arguments--;
                 total_args++;
             }
-            int positional_args = total_args - (int)PyTuple_GET_SIZE(kwnames_o);
+
+            int num_kwargs = (int)PyTuple_GET_SIZE(kwnames_o);
+            int positional_args = total_args - num_kwargs;
+
+            PyObject *temp_new_kwnames = PyList_New(num_kwargs);
+            int num_new_kwargs = 0;
+
+            // filter out UltraNone args
+            _PyStackRef filtered_args[total_args];
+            int nargs_out = 0;
+            for (int i = 0; i < total_args; i++) {
+                PyObject *arg = PyStackRef_AsPyObjectBorrow(arguments[i]);
+                if (Py_IsUltraNone(arg)){
+                    Py_DECREF(arg);
+                }
+                else {
+                    if (i >= positional_args) {
+                        // this was a kwarg that we kept; add its name
+                        PyObject *kwname = PyTuple_GetItem(kwnames_o, i - positional_args);
+                        PyList_SetItem(temp_new_kwnames, num_new_kwargs++, kwname);
+                    }
+                    filtered_args[nargs_out++] = arguments[i];
+                }
+            }
+            total_args = nargs_out;
+            positional_args = nargs_out - num_new_kwargs;
+            arguments = filtered_args;
+            Py_SET_SIZE(temp_new_kwnames, num_new_kwargs);
+            kwnames_o = PyList_AsTuple(temp_new_kwnames);
+            Py_DECREF(temp_new_kwnames);
+
+
             // Check if the call can be inlined or not
             if (Py_TYPE(callable_o) == &PyFunction_Type &&
                 tstate->interp->eval_frame == NULL &&
