@@ -56,7 +56,6 @@ validate_name(PyObject *name)
     static const char * const forbidden[] = {
         "None",
         "True",
-        "UltraNone",
         "False",
         NULL
     };
