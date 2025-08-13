@@ -660,6 +660,7 @@ given type object has a specified feature.
 #define Py_CONSTANT_EMPTY_STR 7
 #define Py_CONSTANT_EMPTY_BYTES 8
 #define Py_CONSTANT_EMPTY_TUPLE 9
+#define Py_CONSTANT_ULTRANONE 10
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030d0000
 PyAPI_FUNC(PyObject*) Py_GetConstant(unsigned int constant_id);
@@ -672,23 +673,30 @@ _Py_NoneStruct is an object of undefined type which can be used in contexts
 where NULL (nil) is not suitable (since NULL often means 'error').
 */
 PyAPI_DATA(PyObject) _Py_NoneStruct; /* Don't use this directly */
+PyAPI_DATA(PyObject) _Py_UltraNoneStruct; /* Don't use this directly */
 
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 >= 0x030D0000
 #  define Py_None Py_GetConstantBorrowed(Py_CONSTANT_NONE)
+#  define Py_UltraNone Py_GetConstantBorrowed(Py_CONSTANT_ULTRANONE)
 #else
 #  define Py_None (&_Py_NoneStruct)
+#  define Py_UltraNone (&_Py_UltraNoneStruct)
 #endif
 
 // Test if an object is the None singleton, the same as "x is None" in Python.
 PyAPI_FUNC(int) Py_IsNone(PyObject *x);
+PyAPI_FUNC(int) Py_IsUltraNone(PyObject *x);
 #define Py_IsNone(x) Py_Is((x), Py_None)
+#define Py_IsUltraNone(x) Py_Is((x), Py_UltraNone)
 
 /* Macro for returning Py_None from a function.
  * Only treat Py_None as immortal in the limited C API 3.12 and newer. */
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 < 0x030c0000
 #  define Py_RETURN_NONE return Py_NewRef(Py_None)
+#  define Py_RETURN_ULTRANONE return Py_NewRef(Py_UltraNone)
 #else
 #  define Py_RETURN_NONE return Py_None
+#  define Py_RETURN_ULTRANONE return Py_UltraNone
 #endif
 
 /*

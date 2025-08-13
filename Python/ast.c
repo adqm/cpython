@@ -56,6 +56,7 @@ validate_name(PyObject *name)
     static const char * const forbidden[] = {
         "None",
         "True",
+        "UltraNone",
         "False",
         NULL
     };
@@ -157,7 +158,7 @@ static int
 validate_constant(PyObject *value)
 {
     assert(!PyErr_Occurred());
-    if (value == Py_None || value == Py_Ellipsis)
+    if (value == Py_None || value == Py_Ellipsis || value == Py_UltraNone)
         return 1;
 
     if (PyLong_CheckExact(value)

@@ -2310,6 +2310,83 @@ PyTypeObject _PyNone_Type = {
 
 PyObject _Py_NoneStruct = _PyObject_HEAD_INIT(&_PyNone_Type);
 
+/*
+UltraNone is a non-NULL undefined value.
+There is (and should be!) no way to create other objects of this type,
+so there is exactly one (which is indestructible, by the way).
+*/
+
+/* ARGSUSED */
+static PyObject *
+ultranone_repr(PyObject *op)
+{
+    return PyUnicode_FromString("UltraNone");
+}
+
+static PyObject *
+ultranone_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
+{
+    if (PyTuple_GET_SIZE(args) || (kwargs && PyDict_GET_SIZE(kwargs))) {
+        PyErr_SetString(PyExc_TypeError, "UltraNoneType takes no arguments");
+        return NULL;
+    }
+    Py_RETURN_ULTRANONE;
+}
+
+static Py_hash_t ultranone_hash(PyObject *v)
+{
+    return 0xFCA86421;
+}
+
+PyDoc_STRVAR(ultranone_doc,
+"UltraNoneType()\n"
+"--\n\n"
+"The type of the UltraNone singleton.");
+
+PyTypeObject _PyUltraNone_Type = {
+    PyVarObject_HEAD_INIT(&PyType_Type, 0)
+    "UltraNoneType",
+    0,
+    0,
+    none_dealloc,       /*tp_dealloc*/
+    0,                  /*tp_vectorcall_offset*/
+    0,                  /*tp_getattr*/
+    0,                  /*tp_setattr*/
+    0,                  /*tp_as_async*/
+    ultranone_repr,          /*tp_repr*/
+    &none_as_number,    /*tp_as_number*/
+    0,                  /*tp_as_sequence*/
+    0,                  /*tp_as_mapping*/
+    ultranone_hash,          /*tp_hash */
+    0,                  /*tp_call */
+    0,                  /*tp_str */
+    0,                  /*tp_getattro */
+    0,                  /*tp_setattro */
+    0,                  /*tp_as_buffer */
+    Py_TPFLAGS_DEFAULT, /*tp_flags */
+    ultranone_doc,           /*tp_doc */
+    0,                  /*tp_traverse */
+    0,                  /*tp_clear */
+    _Py_BaseObject_RichCompare, /*tp_richcompare */
+    0,                  /*tp_weaklistoffset */
+    0,                  /*tp_iter */
+    0,                  /*tp_iternext */
+    0,                  /*tp_methods */
+    0,                  /*tp_members */
+    0,                  /*tp_getset */
+    0,                  /*tp_base */
+    0,                  /*tp_dict */
+    0,                  /*tp_descr_get */
+    0,                  /*tp_descr_set */
+    0,                  /*tp_dictoffset */
+    0,                  /*tp_init */
+    0,                  /*tp_alloc */
+    ultranone_new,           /*tp_new */
+};
+
+PyObject _Py_UltraNoneStruct = _PyObject_HEAD_INIT(&_PyUltraNone_Type);
+
+
 /* NotImplemented is an object that can be used to signal that an
    operation is not implemented for the given type combination. */
 
@@ -3314,6 +3391,7 @@ static PyObject* constants[] = {
     NULL,  // Py_CONSTANT_EMPTY_STR
     NULL,  // Py_CONSTANT_EMPTY_BYTES
     NULL,  // Py_CONSTANT_EMPTY_TUPLE
+    &_Py_UltraNoneStruct,              // Py_CONSTANT_ULTRANONE
 };
 
 void
