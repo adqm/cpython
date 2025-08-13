@@ -41,8 +41,8 @@ class _pickle.UnpicklerMemoProxy "UnpicklerMemoProxyObject *" ""
    Bump DEFAULT_PROTOCOL only when the oldest still supported version of Python
    already includes it. */
 enum {
-    HIGHEST_PROTOCOL = 5,
-    DEFAULT_PROTOCOL = 5
+    HIGHEST_PROTOCOL = 6,
+    DEFAULT_PROTOCOL = 6
 };
 
 #ifdef MS_WINDOWS
@@ -73,6 +73,7 @@ enum opcode {
     LONG            = 'L',
     BININT2         = 'M',
     NONE            = 'N',
+    ULTRANONE       = '!',
     PERSID          = 'P',
     BINPERSID       = 'Q',
     REDUCE          = 'R',
@@ -2089,6 +2090,16 @@ save_none(PicklerObject *self, PyObject *obj)
 {
     const char none_op = NONE;
     if (_Pickler_Write(self, &none_op, 1) < 0)
+        return -1;
+
+    return 0;
+}
+
+static int
+save_ultranone(PicklerObject *self, PyObject *obj)
+{
+    const char ultranone_op = ULTRANONE;
+    if (_Pickler_Write(self, &ultranone_op, 1) < 0)
         return -1;
 
     return 0;
@@ -4387,6 +4398,9 @@ save(PickleState *st, PicklerObject *self, PyObject *obj, int pers_save)
 
     if (obj == Py_None) {
         return save_none(self, obj);
+    }
+    else if (obj == Py_UltraNone) {
+        return save_ultranone(self, obj);
     }
     else if (obj == Py_False || obj == Py_True) {
         return save_bool(self, obj);
