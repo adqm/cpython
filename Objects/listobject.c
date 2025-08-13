@@ -1212,12 +1212,18 @@ list_extend_fast(PyListObject *self, PyObject *iterable)
     // before calling PySequence_Fast_ITEMS.
     //
     // populate the end of self with iterable's items.
+    Py_ssize_t skipped = 0;
     PyObject **src = PySequence_Fast_ITEMS(iterable);
     PyObject **dest = self->ob_item + m;
     for (Py_ssize_t i = 0; i < n; i++) {
         PyObject *o = src[i];
-        FT_ATOMIC_STORE_PTR_RELEASE(dest[i], Py_NewRef(o));
+        if (Py_IsUltraNone(o)) {
+            skipped++;
+            continue;
+        }
+        FT_ATOMIC_STORE_PTR_RELEASE(dest[i-skipped], Py_NewRef(o));
     }
+    Py_SET_SIZE(self, Py_SIZE(self) - skipped);
     return 0;
 }
 
@@ -1271,6 +1277,9 @@ list_extend_iter_lock_held(PyListObject *self, PyObject *iterable)
             break;
         }
 
+        if (Py_IsUltraNone(item)) {
+            continue;
+        }
         if (Py_SIZE(self) < self->allocated) {
             Py_ssize_t len = Py_SIZE(self);
             FT_ATOMIC_STORE_PTR_RELEASE(self->ob_item[len], item);  // steals item ref
@@ -1328,11 +1337,16 @@ list_extend_set(PyListObject *self, PySetObject *other)
     Py_hash_t hash;
     PyObject *key;
     PyObject **dest = self->ob_item + m;
+    Py_ssize_t skipped = 0;
     while (_PySet_NextEntryRef((PyObject *)other, &setpos, &key, &hash)) {
+        if (Py_IsUltraNone(key)) {
+            skipped++;
+            continue;
+        }
         FT_ATOMIC_STORE_PTR_RELEASE(*dest, key);
         dest++;
     }
-    Py_SET_SIZE(self, r);
+    Py_SET_SIZE(self, r-skipped);
     return 0;
 }
 
@@ -1354,8 +1368,13 @@ list_extend_dict(PyListObject *self, PyDictObject *dict, int which_item)
     PyObject **dest = self->ob_item + m;
     Py_ssize_t pos = 0;
     PyObject *keyvalue[2];
+    Py_ssize_t skipped = 0;
     while (_PyDict_Next((PyObject *)dict, &pos, &keyvalue[0], &keyvalue[1], NULL)) {
         PyObject *obj = keyvalue[which_item];
+        if (Py_IsUltraNone(obj)) {
+            skipped++;
+            continue;
+        }
         Py_INCREF(obj);
         FT_ATOMIC_STORE_PTR_RELEASE(*dest, obj);
         dest++;
@@ -3257,9 +3276,16 @@ _PyList_FromStackRefStealOnSuccess(const _PyStackRef *src, Py_ssize_t n)
     }
 
     PyObject **dst = list->ob_item;
+    Py_ssize_t skipped = 0;
     for (Py_ssize_t i = 0; i < n; i++) {
-        dst[i] = PyStackRef_AsPyObjectSteal(src[i]);
+        PyObject *item = PyStackRef_AsPyObjectSteal(src[i]);
+        if (Py_IsUltraNone(item)) {
+            skipped++;
+            continue;
+        }
+        dst[i-skipped] = item;
     }
+    Py_SET_SIZE((PyObject *)list, n - skipped);
 
     return (PyObject *)list;
 }
