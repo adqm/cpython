@@ -2330,7 +2330,7 @@ pass_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
         PyErr_SetString(PyExc_TypeError, "PassType takes no arguments");
         return NULL;
     }
-    Py_RETURN_ULTRANONE;
+    Py_RETURN_PASS;
 }
 
 static Py_hash_t pass_hash(PyObject *v)
@@ -3391,7 +3391,7 @@ static PyObject* constants[] = {
     NULL,  // Py_CONSTANT_EMPTY_STR
     NULL,  // Py_CONSTANT_EMPTY_BYTES
     NULL,  // Py_CONSTANT_EMPTY_TUPLE
-    &_Py_PassStruct,              // Py_CONSTANT_ULTRANONE
+    &_Py_PassStruct,              // Py_CONSTANT_PASS
 };
 
 void

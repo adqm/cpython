@@ -73,7 +73,7 @@ enum opcode {
     LONG            = 'L',
     BININT2         = 'M',
     NONE            = 'N',
-    ULTRANONE       = '!',
+    PASS       = '!',
     PERSID          = 'P',
     BINPERSID       = 'Q',
     REDUCE          = 'R',
@@ -2098,7 +2098,7 @@ save_none(PicklerObject *self, PyObject *obj)
 static int
 save_ultranone(PicklerObject *self, PyObject *obj)
 {
-    const char ultranone_op = ULTRANONE;
+    const char ultranone_op = PASS;
     if (_Pickler_Write(self, &ultranone_op, 1) < 0)
         return -1;
 

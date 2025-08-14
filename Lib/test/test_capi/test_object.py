@@ -25,9 +25,9 @@ class Constant(enum.IntEnum):
     Py_CONSTANT_EMPTY_STR = 7
     Py_CONSTANT_EMPTY_BYTES = 8
     Py_CONSTANT_EMPTY_TUPLE = 9
-    Py_CONSTANT_ULTRANONE = 10
+    Py_CONSTANT_PASS = 10
 
-    INVALID_CONSTANT = Py_CONSTANT_ULTRANONE + 1
+    INVALID_CONSTANT = Py_CONSTANT_PASS + 1
 
 
 class GetConstantTest(unittest.TestCase):
@@ -37,7 +37,7 @@ class GetConstantTest(unittest.TestCase):
         self.assertIs(get_constant(Constant.Py_CONSTANT_TRUE), True)
         self.assertIs(get_constant(Constant.Py_CONSTANT_ELLIPSIS), Ellipsis)
         self.assertIs(get_constant(Constant.Py_CONSTANT_NOT_IMPLEMENTED), NotImplemented)
-        self.assertIs(get_constant(Constant.Py_CONSTANT_ULTRANONE), Pass)
+        self.assertIs(get_constant(Constant.Py_CONSTANT_PASS), Pass)
 
         for constant_id, constant_type, value in (
             (Constant.Py_CONSTANT_ZERO, int, 0),

@@ -55,7 +55,7 @@ module marshal
 /* Supported types */
 #define TYPE_NULL               '0'
 #define TYPE_NONE               'N'
-#define TYPE_ULTRANONE          'U'
+#define TYPE_PASS          'U'
 #define TYPE_FALSE              'F'
 #define TYPE_TRUE               'T'
 #define TYPE_STOPITER           'S'
@@ -444,7 +444,7 @@ w_object(PyObject *v, WFILE *p)
         w_byte(TYPE_NONE, p);
     }
     else if (v == Py_Pass) {
-        w_byte(TYPE_ULTRANONE, p);
+        w_byte(TYPE_PASS, p);
     }
     else if (v == PyExc_StopIteration) {
         w_byte(TYPE_STOPITER, p);
@@ -1169,7 +1169,7 @@ r_object(RFILE *p)
         retval = Py_None;
         break;
 
-    case TYPE_ULTRANONE:
+    case TYPE_PASS:
         retval = Py_Pass;
         break;
 

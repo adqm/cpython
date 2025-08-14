@@ -660,7 +660,7 @@ given type object has a specified feature.
 #define Py_CONSTANT_EMPTY_STR 7
 #define Py_CONSTANT_EMPTY_BYTES 8
 #define Py_CONSTANT_EMPTY_TUPLE 9
-#define Py_CONSTANT_ULTRANONE 10
+#define Py_CONSTANT_PASS 10
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030d0000
 PyAPI_FUNC(PyObject*) Py_GetConstant(unsigned int constant_id);
@@ -677,7 +677,7 @@ PyAPI_DATA(PyObject) _Py_PassStruct; /* Don't use this directly */
 
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 >= 0x030D0000
 #  define Py_None Py_GetConstantBorrowed(Py_CONSTANT_NONE)
-#  define Py_Pass Py_GetConstantBorrowed(Py_CONSTANT_ULTRANONE)
+#  define Py_Pass Py_GetConstantBorrowed(Py_CONSTANT_PASS)
 #else
 #  define Py_None (&_Py_NoneStruct)
 #  define Py_Pass (&_Py_PassStruct)
@@ -693,10 +693,10 @@ PyAPI_FUNC(int) Py_IsPass(PyObject *x);
  * Only treat Py_None as immortal in the limited C API 3.12 and newer. */
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 < 0x030c0000
 #  define Py_RETURN_NONE return Py_NewRef(Py_None)
-#  define Py_RETURN_ULTRANONE return Py_NewRef(Py_Pass)
+#  define Py_RETURN_PASS return Py_NewRef(Py_Pass)
 #else
 #  define Py_RETURN_NONE return Py_None
-#  define Py_RETURN_ULTRANONE return Py_Pass
+#  define Py_RETURN_PASS return Py_Pass
 #endif
 
 /*
