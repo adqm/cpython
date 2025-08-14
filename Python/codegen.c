@@ -4514,6 +4514,7 @@ codegen_sync_comprehension_generator(compiler *c, location loc,
             break;
         case COMP_DICTCOMP:
             if (val == NULL){
+                /* unpacking (**) case */
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
             }
@@ -4656,6 +4657,7 @@ codegen_async_comprehension_generator(compiler *c, location loc,
             break;
         case COMP_DICTCOMP:
             if (val == NULL){
+                /* unpacking (**) case */
                 VISIT(c, expr, elt);
                 ADDOP_I(c, elt_loc, DICT_UPDATE, depth+1);
             }
