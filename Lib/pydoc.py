@@ -1733,22 +1733,37 @@ def resolve(thing, forceload=0):
     """Given an object or a path to an object, get the object and its name."""
     if isinstance(thing, str):
         object = locate(thing, forceload)
-        if object is None:
-            raise ImportError('''\
-No Python documentation found for %r.
-Use help() to get the interactive help utility.
-Use help(str) for help on the str class.''' % thing)
         return object, thing
     else:
         name = getattr(thing, '__name__', None)
         return thing, name if isinstance(name, str) else None
+
+def get_library_help(request):
+    try:
+        from pydoc_data.library import library
+        if request in library:
+            link = f"https://docs.python.org/{sys.version_info[0]}.{sys.version_info[1]}/library/{request}.html"
+            return f"{library[request]}\n\nFull documentation: {link}\n\n"
+        else:
+            return ""
+    except ImportError:
+        return ""
 
 def render_doc(thing, title='Python Library Documentation: %s', forceload=0,
         renderer=None):
     """Render text documentation, given an object or a path to an object."""
     if renderer is None:
         renderer = text
+    preamble = get_library_help(thing)
     object, name = resolve(thing, forceload)
+    if object is None and thing not in {None, 'None'}:
+        if not preamble:
+            raise ImportError(f'''\
+No help available for {thing!r}.
+Use help() to get the interactive help utility.
+Use help(str) for help on the str class.''')
+        else:
+            return f"{title % thing}\n\n{preamble}"
     desc = describe(object)
     module = inspect.getmodule(object)
     if name and '.' in name:
@@ -1768,7 +1783,7 @@ def render_doc(thing, title='Python Library Documentation: %s', forceload=0,
         else:
             object = type(object)
             desc += ' object'
-    return title % desc + '\n\n' + renderer.document(object, name)
+    return f"{title % desc}\n\n{preamble}{renderer.document(object, name)}"
 
 def doc(thing, title='Python Library Documentation: %s', forceload=0,
         output=None, is_cli=False):
