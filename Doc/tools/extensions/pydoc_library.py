@@ -53,10 +53,10 @@ class PyDocLibrarySummaryBuilder(TextBuilder):
 
             doctree = env.get_and_resolve_doctree(path, builder=self)
 
-            paragraph_gen = (n for n in doctree.traverse(nodes.paragraph))
+            paragraph_iter = iter(doctree.traverse(nodes.paragraph))
             paragraphs = []
             while True:
-                para = next(paragraph_gen, None)
+                para = next(paragraph_iter, None)
                 if para is None:
                     break
 
@@ -86,11 +86,22 @@ class PyDocLibrarySummaryBuilder(TextBuilder):
                     # It seems like all of these have follow-up text that
                     # describes alternatives, where to get more information,
                     # etc.  So let's include that as well.
-                    curtext = paragraphs[0].children[0]
-                    paragraphs[0].children[0] = nodes.Text(
+                    curtext = para.children[0]
+                    para.children[0] = nodes.Text(
                         curtext.replace('This module', docname)
                     )
-                    paragraphs.extend(paragraph_gen)
+                    paragraphs.extend(paragraph_iter)
+                if rawsource.endswith(':'):
+                    # maybe the next node is a bulleted list or similar?
+                    # add it to our source
+                    paragraphs.append(
+                        para.traverse(
+                            descend=False,
+                            include_self=False,
+                            siblings=True,
+                            ascend=False,
+                        )[0]
+                    )
                 break
 
             if not paragraphs:
@@ -101,7 +112,7 @@ class PyDocLibrarySummaryBuilder(TextBuilder):
             document.extend(paragraphs)
             visitor = TextTranslator(document, builder=self)
             document.walkabout(visitor)
-            text = "\n".join(map(str.rstrip, visitor.body.splitlines()))
+            text = "\n".join(visitor.body.splitlines(False))
 
             self.summaries[docname] = text
 
