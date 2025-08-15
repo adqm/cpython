@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from time import asctime
 from typing import TYPE_CHECKING
 
@@ -103,10 +104,6 @@ _PYDOC_TOPIC_LABELS: Sequence[str] = sorted({
     "yield",
 })
 
-LIBRARY_SKIP_PAGES = {
-    '__main__',
-}
-
 
 class PydocTopicsBuilder(TextBuilder):
     name = "pydoc-topics"
@@ -116,6 +113,14 @@ class PydocTopicsBuilder(TextBuilder):
         self.topics: dict[str, str] = {}
         self.library_text: dict[str, str] = {}
         self.library_link: dict[str, bool] = {}
+        self.library_chapters: set[str] = {"index"}
+
+        index_src = (Path(self.srcdir) / "library" / "index.rst").read_text()
+        _, toc = index_src.split(".. toctree::")
+        toc = toc.strip().splitlines()[1:]
+        self.library_chapters |= {
+            fname.removesuffix('.rst') for elt in toc if (fname := elt.strip())
+        }
 
     def get_outdated_docs(self) -> str:
         # Return a string describing what an update build will build.
@@ -199,9 +204,6 @@ library = {{
             "extracting library summaries... ",
             length=len(library_docs),
         ):
-            if path.removeprefix('library/') in LIBRARY_SKIP_PAGES:
-                continue
-
             doctree = env.get_and_resolve_doctree(path, builder=self)
 
             paragraph_iter = iter(doctree.traverse(nodes.paragraph))
@@ -229,6 +231,9 @@ library = {{
                     break
 
                 docname = path.removeprefix("library/")
+                if docname in self.library_chapters:
+                    continue
+
                 show_link = True
                 paragraphs.append(para)
 
