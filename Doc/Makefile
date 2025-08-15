@@ -143,12 +143,6 @@ pydoc-topics: build
 	@echo "Building finished; now run this:" \
 	      "cp build/pydoc-topics/topics.py ../Lib/pydoc_data/topics.py"
 
-.PHONY: pydoc-library
-pydoc-library: BUILDER = pydoc-library
-pydoc-library: build
-	@echo "Building finished; now run this:" \
-	      "cp build/pydoc-library/library.py ../Lib/pydoc_data/library.py"
-
 .PHONY: gettext
 gettext: BUILDER = gettext
 gettext: override SPHINXOPTS := --doctree-dir build/doctrees-gettext $(SPHINXOPTS)

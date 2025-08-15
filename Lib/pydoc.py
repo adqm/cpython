@@ -1740,10 +1740,10 @@ def resolve(thing, forceload=0):
 
 def get_library_help(request):
     try:
-        from pydoc_data.library import library
-        if request in library:
+        import pydoc_data.topics
+        if (lib_help := pydoc_data.topics.library.get(request, None)) is not None:
             link = f"https://docs.python.org/{sys.version_info[0]}.{sys.version_info[1]}/library/{request}.html"
-            return f"{library[request]}\n\nFull documentation: {link}\n\n"
+            return f"{lib_help}\n\nOnline documentation: {link}"
         else:
             return ""
     except ImportError:
