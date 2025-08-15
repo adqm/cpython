@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from time import asctime
 from typing import TYPE_CHECKING
@@ -116,11 +117,10 @@ class PydocTopicsBuilder(TextBuilder):
         self.library_chapters: set[str] = {"index"}
 
         index_src = (Path(self.srcdir) / "library" / "index.rst").read_text()
+
         _, toc = index_src.split(".. toctree::")
-        toc = toc.strip().splitlines()[1:]
-        self.library_chapters |= {
-            fname.removesuffix('.rst') for elt in toc if (fname := elt.strip())
-        }
+        for m in re.findall(r"(\w+)\.rst", toc):
+            self.library_chapters.add(m)
 
     def get_outdated_docs(self) -> str:
         # Return a string describing what an update build will build.
