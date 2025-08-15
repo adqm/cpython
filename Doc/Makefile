@@ -46,7 +46,6 @@ help:
 	@echo "  coverage   to check documentation coverage for library and C API"
 	@echo "  doctest    to run doctests in the documentation"
 	@echo "  pydoc-topics  to regenerate the pydoc topics file"
-	@echo "  pydoc-library  to regenerate the pydoc library summary file"
 	@echo "  dist       to create a \"dist\" directory with archived docs for download"
 	@echo "  check      to run a check for frequent markup errors"
 
