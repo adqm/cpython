@@ -84,6 +84,10 @@ from _pyrepl.pager import (get_pager, pipe_pager,
 # Expose plain() as pydoc.plain()
 from _pyrepl.pager import plain  # noqa: F401
 
+PYTHONDOCS = os.environ.get(
+    "PYTHONDOCS",
+    "https://docs.python.org/%d.%d/library" % sys.version_info[:2]
+)
 
 # --------------------------------------------------------- old names
 
@@ -533,10 +537,6 @@ def safeimport(path, forceload=0, cache={}):
 
 class Doc:
 
-    PYTHONDOCS = os.environ.get("PYTHONDOCS",
-                                "https://docs.python.org/%d.%d/library"
-                                % sys.version_info[:2])
-
     def document(self, object, name=None, *args):
         """Generate documentation for an object."""
         args = (object, name) + args
@@ -569,8 +569,6 @@ class Doc:
         except TypeError:
             file = '(built-in)'
 
-        docloc = os.environ.get("PYTHONDOCS", self.PYTHONDOCS)
-
         basedir = os.path.normcase(basedir)
         if (isinstance(object, type(os)) and
             (object.__name__ in ('errno', 'exceptions', 'gc',
@@ -579,10 +577,10 @@ class Doc:
              (file.startswith(basedir) and
               not file.startswith(os.path.join(basedir, 'site-packages')))) and
             object.__name__ not in ('xml.etree', 'test.test_pydoc.pydoc_mod')):
-            if docloc.startswith(("http://", "https://")):
-                docloc = "{}/{}.html".format(docloc.rstrip("/"), object.__name__.lower())
+            if PYTHONDOCS.startswith(("http://", "https://")):
+                docloc = "{}/{}.html".format(PYTHONDOCS.rstrip("/"), object.__name__.lower())
             else:
-                docloc = os.path.join(docloc, object.__name__.lower() + ".html")
+                docloc = os.path.join(PYTHONDOCS, object.__name__.lower() + ".html")
         else:
             docloc = None
         return docloc
@@ -1303,19 +1301,19 @@ class TextDoc(Doc):
         synop, desc = splitdoc(getdoc(object))
         result = self.section('NAME', name + (synop and ' - ' + synop))
         all = getattr(object, '__all__', None)
-        docloc = self.getdocloc(object)
-        if docloc is not None:
-            result = result + self.section('MODULE REFERENCE', docloc + """
-
-The following documentation is automatically generated from the Python
-source files.  It may be incomplete, incorrect or include features that
-are considered implementation detail and may vary between Python
-implementations.  When in doubt, consult the module reference at the
-location listed above.
-""")
 
         if desc:
             result = result + self.section('DESCRIPTION', desc)
+
+        docloc = self.getdocloc(object)
+        if docloc is not None:
+            result = result + self.section('MODULE REFERENCE', """
+The following documentation is automatically generated from the Python
+source files.  It may be incomplete, incorrect or include features that
+are considered implementation detail and may vary between Python
+implementations.  When in doubt, consult the module reference on the web
+at the link above.
+""")
 
         classes = []
         for key, value in inspect.getmembers(object, inspect.isclass):
@@ -1744,7 +1742,7 @@ def get_library_help(request):
         if (lib_help := pydoc_data.topics.library.get(request, None)) is not None:
             show_link, text = lib_help
             if show_link:
-                link = f"https://docs.python.org/{sys.version_info[0]}.{sys.version_info[1]}/library/{request}.html"
+                link = f"{PYTHONDOCS}/{request}.html"
                 return f"{text}Online documentation: {link}\n\n"
             return text
         else:
