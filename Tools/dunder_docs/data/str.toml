@@ -1,0 +1,32 @@
+__add__ = """
+__add__($self, value, /)
+--
+
+Implements self + value.
+
+Return the concatenation of self and value.
+"""
+
+__contains__ = """
+__contains__($self, value, /)
+--
+
+Implements value in self.
+
+Return True if the given value is a substring of self, and False
+otherwise.
+
+Equivalent to self.find(value) >= 0.
+"""
+
+__getitem__ = """
+__getitem__($self, key, /)
+--
+
+Implements self[key].
+
+If key is an integer, return a length-1 string containing the
+character at that index in self.
+
+If key is a slice, return the corresponding substring of self.
+"""
