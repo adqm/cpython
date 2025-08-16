@@ -33,6 +33,7 @@
 #include "pycore_typevarobject.h" // _PyTypeAlias_Type
 #include "pycore_unionobject.h"   // _PyUnion_Type
 
+#include "pycore_dunder_docs.h" // _Py_BuildDunderDocs
 
 #ifdef Py_LIMITED_API
    // Prevent recursive call _Py_IncRef() <=> Py_INCREF()
@@ -2566,6 +2567,21 @@ static PyTypeObject* static_types[] = {
 };
 
 
+static PyObject *dunder_doc_overrides = NULL;
+
+static int
+ensure_dunder_docs_loaded(void)
+{
+    if (dunder_doc_overrides != NULL) {
+        return 0;
+    }
+    dunder_doc_overrides = PyDict_New();
+    if (dunder_doc_overrides == NULL) {
+        return -1;
+    }
+    return _Py_BuildDunderDocs(dunder_doc_overrides);
+}
+
 PyStatus
 _PyTypes_InitTypes(PyInterpreterState *interp)
 {
@@ -2590,9 +2606,13 @@ _PyTypes_InitTypes(PyInterpreterState *interp)
     }
     _Py_INTERP_CACHED_OBJECT(interp, objreduce) = baseobj_reduce;
 
+
     // Must be after static types are initialized
     if (_Py_initialize_generic(interp) < 0) {
         return _PyStatus_ERR("Can't initialize generic types");
+    }
+    if (ensure_dunder_docs_loaded() < 0) {
+        return _PyStatus_ERR("Can't initialize docstrings for builtin types");
     }
 
     return _PyStatus_OK();

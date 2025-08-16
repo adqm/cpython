@@ -688,7 +688,7 @@ static PyObject *
 wrapperdescr_get_doc(PyObject *self, void *closure)
 {
     PyWrapperDescrObject *descr = (PyWrapperDescrObject *)self;
-    return _PyType_GetDocFromInternalDoc(descr->d_base->name, descr->d_base->doc);
+    return _PyType_GetDocFromInternalDoc(descr->d_base->name, descr->doc);
 }
 
 static PyObject *
@@ -696,7 +696,7 @@ wrapperdescr_get_text_signature(PyObject *self, void *closure)
 {
     PyWrapperDescrObject *descr = (PyWrapperDescrObject *)self;
     return _PyType_GetTextSignatureFromInternalDoc(descr->d_base->name,
-                                                   descr->d_base->doc, 0);
+                                                   descr->doc, 0);
 }
 
 static PyGetSetDef wrapperdescr_getset[] = {
@@ -1021,6 +1021,7 @@ PyDescr_NewWrapper(PyTypeObject *type, struct wrapperbase *base, void *wrapped)
     if (descr != NULL) {
         descr->d_base = base;
         descr->d_wrapped = wrapped;
+        descr->doc = base->doc;
     }
     return (PyObject *)descr;
 }
@@ -1406,7 +1407,7 @@ static PyObject *
 wrapper_doc(PyObject *self, void *Py_UNUSED(ignored))
 {
     wrapperobject *wp = (wrapperobject *)self;
-    return _PyType_GetDocFromInternalDoc(wp->descr->d_base->name, wp->descr->d_base->doc);
+    return _PyType_GetDocFromInternalDoc(wp->descr->d_base->name, wp->descr->doc);
 }
 
 static PyObject *
@@ -1414,7 +1415,7 @@ wrapper_text_signature(PyObject *self, void *Py_UNUSED(ignored))
 {
     wrapperobject *wp = (wrapperobject *)self;
     return _PyType_GetTextSignatureFromInternalDoc(wp->descr->d_base->name,
-                                                   wp->descr->d_base->doc, 0);
+                                                   wp->descr->doc, 0);
 }
 
 static PyObject *
