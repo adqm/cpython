@@ -1358,6 +1358,12 @@ at the link above.
             result = result + self.section(
                 'SUBMODULES', '\n'.join(submodules))
 
+        if funcs:
+            contents = []
+            for key, value in funcs:
+                contents.append(self.document(value, key, name))
+            result = result + self.section('FUNCTIONS', '\n'.join(contents))
+
         if classes:
             classlist = [value for key, value in classes]
             contents = [self.formattree(
@@ -1365,12 +1371,6 @@ at the link above.
             for key, value in classes:
                 contents.append(self.document(value, key, name))
             result = result + self.section('CLASSES', '\n'.join(contents))
-
-        if funcs:
-            contents = []
-            for key, value in funcs:
-                contents.append(self.document(value, key, name))
-            result = result + self.section('FUNCTIONS', '\n'.join(contents))
 
         if data:
             contents = []
