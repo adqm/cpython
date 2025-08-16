@@ -75,7 +75,7 @@ _Py_BuildDunderDocs(PyObject *target) {
 
     field = PyUnicode_FromString("__rmod__");
     descr = PyDict_GetItem(dict, field);
-    ((PyWrapperDescrObject *)descr)->doc = "__rmod__($self, value, /)\n--\n\nImplements value % self.\n\nReturn a new string printf-style string formatting, where value contains\n'%' conversation specifications and self provides values to be included.\nAlternative options for string formatting include str.format, or\ntemplate strings.\n";
+    ((PyWrapperDescrObject *)descr)->doc = "__rmod__($self, value, /)\n--\n\nImplements value % self.\n\nReturn a new string using printf-style string formatting, where value\ncontains '%' conversation specifications and self provides values to be\nincluded.  Alternative options for string formatting include str.format,\nor template strings.\n";
     Py_DECREF(field);
 
     field = PyUnicode_FromString("__rmul__");

@@ -133,10 +133,10 @@ __rmod__($self, value, /)
 
 Implements value % self.
 
-Return a new string printf-style string formatting, where value contains
-'%' conversation specifications and self provides values to be included.
-Alternative options for string formatting include str.format, or
-template strings.
+Return a new string using printf-style string formatting, where value
+contains '%' conversation specifications and self provides values to be
+included.  Alternative options for string formatting include str.format,
+or template strings.
 """
 
 __rmul__ = """
