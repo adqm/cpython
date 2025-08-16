@@ -23,9 +23,64 @@ _Py_BuildDunderDocs(PyObject *target) {
     ((PyWrapperDescrObject *)descr)->doc = "__contains__($self, value, /)\n--\n\nImplements value in self.\n\nReturn True if the given value is a substring of self, and False\notherwise.\n\nEquivalent to self.find(value) >= 0.\n";
     Py_DECREF(field);
 
+    field = PyUnicode_FromString("__ge__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__ge__($self, value, /)\n--\n\nImplements self >= value.\n\nStrings are compared character by character using their Unicode code\npoints.  If all compared characters are equal, the longer string is\nconsidered to be greater.\n";
+    Py_DECREF(field);
+
     field = PyUnicode_FromString("__getitem__");
     descr = PyDict_GetItem(dict, field);
     ((PyWrapperDescrObject *)descr)->doc = "__getitem__($self, key, /)\n--\n\nImplements self[key].\n\nIf key is an integer, return a length-1 string containing the\ncharacter at that index in self.\n\nIf key is a slice, return the corresponding substring of self.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__gt__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__gt__($self, value, /)\n--\n\nImplements self > value.\n\nStrings are compared character by character using their Unicode code\npoints.  If all compared characters are equal, the longer string is\nconsidered to be greater.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__iter__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__iter__($self, /)\n--\n\nImplements iter(self).\n\nReturn an iterator over the characters of self.  The iterator yields\nsuccessive length-1 substrings, each corresponding to a single Unicode\ncharacter in self.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__le__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__le__($self, value, /)\n--\n\nImplements self <= value.\n\nStrings are compared character by character using their Unicode code\npoints.  If all compared characters are equal, the longer string is\nconsidered to be greater.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__len__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__len__($self, /)\n--\n\nImplements len(self).\n\nReturn the number of Unicode characters in self.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__lt__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__lt__($self, value, /)\n--\n\nImplements self < value.\n\nStrings are compared character by character using their Unicode code\npoints.  If all compared characters are equal, the longer string is\nconsidered to be greater.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__mod__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__mod__($self, value, /)\n--\n\nImplements self % value.\n\nReturn a new string printf-style string formatting, replacing '%'\nconversion specifications in self with zero or more elements in the\ngiven value.  Alternative options for string formatting include\nstr.format, or template strings.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__mul__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__mul__($self, value, /)\n--\n\nImplements self * value.\n\nReturn a new string containing the contents of self repeated a number of\ntimes given by value, which must be an integer.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__repr__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__repr__($self, /)\n--\n\nImplements repr(self).\n\nReturn a new string containing Python code that, when evaluated,\nproduces a new string equivalent to self.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__rmod__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__rmod__($self, value, /)\n--\n\nImplements value % self.\n\nReturn a new string printf-style string formatting, where value contains\n'%' conversation specifications and self provides values to be included.\nAlternative options for string formatting include str.format, or\ntemplate strings.\n";
+    Py_DECREF(field);
+
+    field = PyUnicode_FromString("__rmul__");
+    descr = PyDict_GetItem(dict, field);
+    ((PyWrapperDescrObject *)descr)->doc = "__rmul__($self, value, /)\n--\n\nImplements value * self.\n\nReturn a new string containing the contents of self repeated a number of\ntimes given by value, which must be an integer.\n\nEquivalent to self.__mul__(value).\n";
     Py_DECREF(field);
 
     Py_DECREF(dict);

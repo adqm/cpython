@@ -19,6 +19,17 @@ otherwise.
 Equivalent to self.find(value) >= 0.
 """
 
+__ge__ = """
+__ge__($self, value, /)
+--
+
+Implements self >= value.
+
+Strings are compared character by character using their Unicode code
+points.  If all compared characters are equal, the longer string is
+considered to be greater.
+"""
+
 __getitem__ = """
 __getitem__($self, key, /)
 --
@@ -29,4 +40,113 @@ If key is an integer, return a length-1 string containing the
 character at that index in self.
 
 If key is a slice, return the corresponding substring of self.
+"""
+
+__gt__ = """
+__gt__($self, value, /)
+--
+
+Implements self > value.
+
+Strings are compared character by character using their Unicode code
+points.  If all compared characters are equal, the longer string is
+considered to be greater.
+"""
+
+__iter__ = """
+__iter__($self, /)
+--
+
+Implements iter(self).
+
+Return an iterator over the characters of self.  The iterator yields
+successive length-1 substrings, each corresponding to a single Unicode
+character in self.
+"""
+
+__le__ = """
+__le__($self, value, /)
+--
+
+Implements self <= value.
+
+Strings are compared character by character using their Unicode code
+points.  If all compared characters are equal, the longer string is
+considered to be greater.
+"""
+
+__len__ = """
+__len__($self, /)
+--
+
+Implements len(self).
+
+Return the number of Unicode characters in self.
+"""
+
+__lt__ = """
+__lt__($self, value, /)
+--
+
+Implements self < value.
+
+Strings are compared character by character using their Unicode code
+points.  If all compared characters are equal, the longer string is
+considered to be greater.
+"""
+
+__mod__ = """
+__mod__($self, value, /)
+--
+
+Implements self % value.
+
+Return a new string printf-style string formatting, replacing '%'
+conversion specifications in self with zero or more elements in the
+given value.  Alternative options for string formatting include
+str.format, or template strings.
+"""
+
+__mul__ = """
+__mul__($self, value, /)
+--
+
+Implements self * value.
+
+Return a new string containing the contents of self repeated a number of
+times given by value, which must be an integer.
+"""
+
+__repr__ = """
+__repr__($self, /)
+--
+
+Implements repr(self).
+
+Return a new string containing Python code that, when evaluated,
+produces a new string equivalent to self.
+"""
+
+__rmod__ = """
+__rmod__($self, value, /)
+--
+
+Implements value % self.
+
+Return a new string printf-style string formatting, where value contains
+'%' conversation specifications and self provides values to be included.
+Alternative options for string formatting include str.format, or
+template strings.
+"""
+
+__rmul__ = """
+__rmul__($self, value, /)
+--
+
+Implements value * self.
+
+Return a new string containing the contents of self repeated a number of
+times given by value, which must be an integer.
+
+Equivalent to self.__mul__(value).
 """
