@@ -25,7 +25,7 @@ _Py_BuildDunderDocs(PyObject *target) {
 
     field = PyUnicode_FromString("__ge__");
     descr = PyDict_GetItem(dict, field);
-    ((PyWrapperDescrObject *)descr)->doc = "__ge__($self, value, /)\n--\n\nImplements self >= value.\n\nStrings are compared character by character using their Unicode code\npoints.  If all compared characters are equal, the longer string is\nconsidered to be greater.\n";
+    ((PyWrapperDescrObject *)descr)->doc = "__ge__($self, value, /)\n--\n\nImplements self >= value.\n\nComparisons of strings use lexicographical ordering.  self and value are\ncompared character by character using their Unicode code points.  If all\ncompared characters are equal, the longer string is considered to be\ngreater.\n";
     Py_DECREF(field);
 
     field = PyUnicode_FromString("__getitem__");
@@ -35,7 +35,7 @@ _Py_BuildDunderDocs(PyObject *target) {
 
     field = PyUnicode_FromString("__gt__");
     descr = PyDict_GetItem(dict, field);
-    ((PyWrapperDescrObject *)descr)->doc = "__gt__($self, value, /)\n--\n\nImplements self > value.\n\nStrings are compared character by character using their Unicode code\npoints.  If all compared characters are equal, the longer string is\nconsidered to be greater.\n";
+    ((PyWrapperDescrObject *)descr)->doc = "__gt__($self, value, /)\n--\n\nImplements self > value.\n\nComparisons of strings use lexicographical ordering.  self and value are\ncompared character by character using their Unicode code points.  If all\ncompared characters are equal, the longer string is considered to be\ngreater.\n";
     Py_DECREF(field);
 
     field = PyUnicode_FromString("__iter__");
@@ -45,7 +45,7 @@ _Py_BuildDunderDocs(PyObject *target) {
 
     field = PyUnicode_FromString("__le__");
     descr = PyDict_GetItem(dict, field);
-    ((PyWrapperDescrObject *)descr)->doc = "__le__($self, value, /)\n--\n\nImplements self <= value.\n\nStrings are compared character by character using their Unicode code\npoints.  If all compared characters are equal, the longer string is\nconsidered to be greater.\n";
+    ((PyWrapperDescrObject *)descr)->doc = "__le__($self, value, /)\n--\n\nImplements self <= value.\n\nComparisons of strings use lexicographical ordering.  self and value are\ncompared character by character using their Unicode code points.  If all\ncompared characters are equal, the longer string is considered to be\ngreater.\n";
     Py_DECREF(field);
 
     field = PyUnicode_FromString("__len__");
@@ -55,7 +55,7 @@ _Py_BuildDunderDocs(PyObject *target) {
 
     field = PyUnicode_FromString("__lt__");
     descr = PyDict_GetItem(dict, field);
-    ((PyWrapperDescrObject *)descr)->doc = "__lt__($self, value, /)\n--\n\nImplements self < value.\n\nStrings are compared character by character using their Unicode code\npoints.  If all compared characters are equal, the longer string is\nconsidered to be greater.\n";
+    ((PyWrapperDescrObject *)descr)->doc = "__lt__($self, value, /)\n--\n\nImplements self < value.\n\nComparisons of strings use lexicographical ordering.  self and value are\ncompared character by character using their Unicode code points.  If all\ncompared characters are equal, the longer string is considered to be\ngreater.\n";
     Py_DECREF(field);
 
     field = PyUnicode_FromString("__mod__");

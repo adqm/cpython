@@ -25,9 +25,10 @@ __ge__($self, value, /)
 
 Implements self >= value.
 
-Strings are compared character by character using their Unicode code
-points.  If all compared characters are equal, the longer string is
-considered to be greater.
+Comparisons of strings use lexicographical ordering.  self and value are
+compared character by character using their Unicode code points.  If all
+compared characters are equal, the longer string is considered to be
+greater.
 """
 
 __getitem__ = """
@@ -48,9 +49,10 @@ __gt__($self, value, /)
 
 Implements self > value.
 
-Strings are compared character by character using their Unicode code
-points.  If all compared characters are equal, the longer string is
-considered to be greater.
+Comparisons of strings use lexicographical ordering.  self and value are
+compared character by character using their Unicode code points.  If all
+compared characters are equal, the longer string is considered to be
+greater.
 """
 
 __iter__ = """
@@ -70,9 +72,10 @@ __le__($self, value, /)
 
 Implements self <= value.
 
-Strings are compared character by character using their Unicode code
-points.  If all compared characters are equal, the longer string is
-considered to be greater.
+Comparisons of strings use lexicographical ordering.  self and value are
+compared character by character using their Unicode code points.  If all
+compared characters are equal, the longer string is considered to be
+greater.
 """
 
 __len__ = """
@@ -90,9 +93,10 @@ __lt__($self, value, /)
 
 Implements self < value.
 
-Strings are compared character by character using their Unicode code
-points.  If all compared characters are equal, the longer string is
-considered to be greater.
+Comparisons of strings use lexicographical ordering.  self and value are
+compared character by character using their Unicode code points.  If all
+compared characters are equal, the longer string is considered to be
+greater.
 """
 
 __mod__ = """
