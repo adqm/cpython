@@ -1302,9 +1302,6 @@ class TextDoc(Doc):
         result = self.section('NAME', name + (synop and ' - ' + synop))
         all = getattr(object, '__all__', None)
 
-        if desc:
-            result = result + self.section('DESCRIPTION', desc)
-
         library_preamble = get_library_help(name)
         if library_preamble:
             result = result + self.section('MODULE REFERENCE', library_preamble + """\
@@ -1314,6 +1311,9 @@ are considered implementation detail and may vary between Python
 implementations.  When in doubt, consult the module reference on the web
 at the link above.
 """)
+
+        if desc:
+            result = result + self.section('DESCRIPTION', desc)
 
         classes = []
         for key, value in inspect.getmembers(object, inspect.isclass):
