@@ -9,19 +9,25 @@ _Py_BuildDunderDocs(PyObject *target) {
     PyObject *dict;
     PyObject *field;
     PyObject *descr;
+
+
+    /* STR */
     dict = PyType_GetDict(&PyUnicode_Type);
     field = PyUnicode_FromString("__add__");
     descr = PyDict_GetItem(dict, field);
     ((PyWrapperDescrObject *)descr)->doc = "__add__($self, value, /)\n--\n\nImplements self + value.\n\nReturn the concatenation of self and value.\n";
     Py_DECREF(field);
+
     field = PyUnicode_FromString("__contains__");
     descr = PyDict_GetItem(dict, field);
     ((PyWrapperDescrObject *)descr)->doc = "__contains__($self, value, /)\n--\n\nImplements value in self.\n\nReturn True if the given value is a substring of self, and False\notherwise.\n\nEquivalent to self.find(value) >= 0.\n";
     Py_DECREF(field);
+
     field = PyUnicode_FromString("__getitem__");
     descr = PyDict_GetItem(dict, field);
     ((PyWrapperDescrObject *)descr)->doc = "__getitem__($self, key, /)\n--\n\nImplements self[key].\n\nIf key is an integer, return a length-1 string containing the\ncharacter at that index in self.\n\nIf key is a slice, return the corresponding substring of self.\n";
     Py_DECREF(field);
+
     Py_DECREF(dict);
     return 0;
 };

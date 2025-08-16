@@ -1863,6 +1863,13 @@ regen-global-objects: $(srcdir)/Tools/build/generate_global_objects.py clinic
 	$(PYTHON_FOR_REGEN) $(srcdir)/Tools/build/generate_global_objects.py
 
 ############################################################################
+# Regenerate docstrings for dunder methods of built-in types
+
+.PHONY: regen-dunder-docs
+regen-dunder-docs: $(srcdir)/Tools/dunder_docs/make_dunder_docs.py
+	$(PYTHON_FOR_REGEN) $(srcdir)/Tools/dunder_docs/make_dunder_docs.py
+
+############################################################################
 # ABI
 
 .PHONY: regen-abidump
@@ -1895,7 +1902,7 @@ regen-unicodedata:
 regen-all: regen-cases regen-typeslots \
 	regen-token regen-ast regen-keyword regen-sre regen-frozen \
 	regen-pegen-metaparser regen-pegen regen-test-frozenmain \
-	regen-test-levenshtein regen-global-objects
+	regen-test-levenshtein regen-global-objects regen-dunder-docs
 	@echo
 	@echo "Note: make regen-stdlib-module-names, make regen-limited-abi, "
 	@echo "make regen-configure, make regen-sbom, and make regen-unicodedata should be run manually"

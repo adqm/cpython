@@ -33,6 +33,9 @@ with DEST.open("w") as f:
             if type_fname.suffix != ".toml":
                 continue
             type_ = type_fname.stem
+            print()
+            print()
+            print(f"    /* {type_.upper()} */")
             c_typename = TYPE_MAP.get(type_, f"Py{type_.title()}")
             print(f"    dict = PyType_GetDict(&{c_typename}_Type);")
             with open(type_fname, "rb") as type_file:
@@ -45,6 +48,7 @@ with DEST.open("w") as f:
                         f"    ((PyWrapperDescrObject *)descr)->doc = {c_escape(doc)};"
                     )
                     print(f"    Py_DECREF(field);")
+                    print()
             print(f"    Py_DECREF(dict);")
             print(f"    return 0;")
         print("};")
