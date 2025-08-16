@@ -1305,9 +1305,9 @@ class TextDoc(Doc):
         if desc:
             result = result + self.section('DESCRIPTION', desc)
 
-        docloc = self.getdocloc(object)
-        if docloc is not None:
-            result = result + self.section('MODULE REFERENCE', """
+        library_preamble = get_library_help(name)
+        if library_preamble:
+            result = result + self.section('MODULE REFERENCE', library_preamble + """\
 The following documentation is automatically generated from the Python
 source files.  It may be incomplete, incorrect or include features that
 are considered implementation detail and may vary between Python
@@ -1743,7 +1743,7 @@ def get_library_help(request):
             show_link, text = lib_help
             if show_link:
                 link = f"{PYTHONDOCS}/{request}.html"
-                return f"{text}Online documentation: {link}\n\n"
+                return f"{text}Online Reference: {link}\n\n"
             return text
         else:
             return ""
@@ -1755,9 +1755,9 @@ def render_doc(thing, title='Python Library Documentation: %s', forceload=0,
     """Render text documentation, given an object or a path to an object."""
     if renderer is None:
         renderer = text
-    preamble = get_library_help(thing)
     object, name = resolve(thing, forceload)
     if object is None and thing not in {None, 'None'}:
+        preamble = get_library_help(thing)
         if not preamble:
             raise ImportError(f'''\
 No Python documentation found for {thing!r}.
@@ -1784,7 +1784,7 @@ Use help(str) for help on the str class.''')
         else:
             object = type(object)
             desc += ' object'
-    return f"{title % desc}\n\n{preamble}{renderer.document(object, name)}"
+    return f"{title % desc}\n\n{renderer.document(object, name)}"
 
 def doc(thing, title='Python Library Documentation: %s', forceload=0,
         output=None, is_cli=False):
