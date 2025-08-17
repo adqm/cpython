@@ -1,0 +1,3 @@
+For many objects, obj.__dict__ is a dictionary or mapping used to store
+that object's writeable attributes.  But note that not all objects have
+a __dict__ attribute.

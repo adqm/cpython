@@ -77,6 +77,7 @@ from annotationlib import Format
 from collections import deque
 from reprlib import Repr
 from traceback import format_exception_only
+from pathlib import Path
 
 from _pyrepl.pager import (get_pager, pipe_pager,
                            plain_pager, tempfile_pager, tty_pager)
@@ -1849,10 +1850,19 @@ def _introdoc():
         enter "q", "quit" or "exit".
     ''')
 
+def bespoke_help(name):
+    try:
+        path = Path(__file__).parent / "pydoc_data" / "bespoke_help" / f"{name}.txt"
+        return path.read_text()
+    except:
+        return None
+
 def collect_dunders(symbols):
     dunders = {
         '__main__': ('__main__', ''),
         '__call__': ('callable-types', 'SPECIALMETHODS'),
+        '__name__': (bespoke_help, '__main__ MODULES FUNCTIONS CLASSES METHODS'),
+        '__dict__': (bespoke_help, 'MODULES FUNCTIONS CLASSES METHODS'),
     }
 
     basic_dunders = [
@@ -2291,11 +2301,17 @@ module "pydoc_data.topics" could not be found.
             return self.showtopic(target, more_xrefs)
 
         label, xrefs = target
-        try:
-            doc = pydoc_data.topics.topics[label]
-        except KeyError:
-            self.output.write('no documentation found for %s\n' % repr(topic))
-            return
+        if label is bespoke_help:
+            doc = bespoke_help(topic)
+            if doc is None:
+                self.output.write('no documentation found for %s\n' % repr(topic))
+                return
+        else:
+            try:
+                doc = pydoc_data.topics.topics[label]
+            except KeyError:
+                self.output.write('no documentation found for %s\n' % repr(topic))
+                return
         doc = doc.strip() + '\n'
         if more_xrefs:
             xrefs = (xrefs or '') + ' ' + more_xrefs
