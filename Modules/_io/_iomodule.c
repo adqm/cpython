@@ -764,18 +764,17 @@ io_maybe_close_after_op(PyObject *self, PyObject *result, int close)
         return result;
     }
 
-    PyObject *type, *value, *tb;
-    PyErr_Fetch(&type, &value, &tb);
-
+    // operation failed.  try to close.
+    PyObject *exc = PyErr_GetRaisedException();
     PyObject *r = _PyObject_CallMethodNoArgs(self, &_Py_ID(close));
     if (r == NULL) {
-        PyObject *ct, *cv, *ctb;
-        PyErr_Fetch(&ct, &cv, &ctb);
-        _PyErr_ChainExceptions(ct, cv, ctb);
+        // close failed as well.
+        _PyErr_ChainExceptions1(PyErr_GetRaisedException());
     } else {
+        // close succeeded
         Py_DECREF(r);
     }
 
-    PyErr_Restore(type, value, tb);
+    PyErr_SetRaisedException(exc);
     return result;
 }
