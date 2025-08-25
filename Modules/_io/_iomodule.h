@@ -195,3 +195,6 @@ extern PyObject *_PyIOBase_cannot_pickle(PyObject *self, PyObject *args);
 #ifdef HAVE_WINDOWS_CONSOLE_IO
 extern char _PyIO_get_console_type(PyObject *);
 #endif
+
+extern PyObject *
+io_maybe_close_after_op(PyObject *self, PyObject *result, int close);

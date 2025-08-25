@@ -87,13 +87,17 @@ _bufferediobase_readinto_generic(PyObject *self, Py_buffer *buffer, char readint
 _io._BufferedIOBase.readinto
     buffer: Py_buffer(accept={rwbuffer})
     /
+    *
+    close: bool = False
 [clinic start generated code]*/
 
 static PyObject *
-_io__BufferedIOBase_readinto_impl(PyObject *self, Py_buffer *buffer)
-/*[clinic end generated code: output=8c8cda6684af8038 input=5273d20db7f56e1a]*/
+_io__BufferedIOBase_readinto_impl(PyObject *self, Py_buffer *buffer,
+                                  int close)
+/*[clinic end generated code: output=87ec876e4496adad input=dad76bd6c0d6acce]*/
 {
-    return _bufferediobase_readinto_generic(self, buffer, 0);
+    PyObject *result = _bufferediobase_readinto_generic(self, buffer, 0);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /*[clinic input]
@@ -143,6 +147,8 @@ _io._BufferedIOBase.read
     cls: defining_class
     size: int(unused=True) = -1
     /
+    *
+    close: bool = False
 
 Read and return up to n bytes.
 
@@ -164,11 +170,12 @@ mode and no data is available at the moment.
 
 static PyObject *
 _io__BufferedIOBase_read_impl(PyObject *self, PyTypeObject *cls,
-                              int Py_UNUSED(size))
-/*[clinic end generated code: output=aceb2765587b0a29 input=824f6f910465e61a]*/
+                              int Py_UNUSED(size), int close)
+/*[clinic end generated code: output=dfce20ebb20e5d07 input=da0526c44079a139]*/
 {
     _PyIO_State *state = get_io_state_by_cls(cls);
-    return bufferediobase_unsupported(state, "read");
+    PyObject *result = bufferediobase_unsupported(state, "read");
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /*[clinic input]
@@ -178,6 +185,9 @@ _io._BufferedIOBase.read1
     cls: defining_class
     size: int(unused=True) = -1
     /
+    *
+    close: bool = False
+
 
 Read and return up to size bytes, with at most one read() call to the underlying raw stream.
 
@@ -187,11 +197,12 @@ A short result does not imply that EOF is imminent.
 
 static PyObject *
 _io__BufferedIOBase_read1_impl(PyObject *self, PyTypeObject *cls,
-                               int Py_UNUSED(size))
-/*[clinic end generated code: output=2e7fc62972487eaa input=1e76df255063afd6]*/
+                               int Py_UNUSED(size), int close)
+/*[clinic end generated code: output=e4ad93f21b905b82 input=e4972fb7bb3f7aeb]*/
 {
     _PyIO_State *state = get_io_state_by_cls(cls);
-    return bufferediobase_unsupported(state, "read1");
+    PyObject *result = bufferediobase_unsupported(state, "read1");
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /*[clinic input]
@@ -973,17 +984,8 @@ end:
     return res;
 }
 
-/*[clinic input]
-@critical_section
-_io._Buffered.read
-    size as n: Py_ssize_t(accept={int, NoneType}) = -1
-    /
-[clinic start generated code]*/
-
 static PyObject *
-_io__Buffered_read_impl(buffered *self, Py_ssize_t n)
-/*[clinic end generated code: output=f41c78bb15b9bbe9 input=bdb4b0425b295472]*/
-{
+buffered_read_internal(buffered *self, Py_ssize_t n) {
     PyObject *res;
 
     CHECK_INITIALIZED(self)
@@ -1013,6 +1015,24 @@ _io__Buffered_read_impl(buffered *self, Py_ssize_t n)
 
     LEAVE_BUFFERED(self)
     return res;
+}
+
+
+/*[clinic input]
+@critical_section
+_io._Buffered.read
+    size as n: Py_ssize_t(accept={int, NoneType}) = -1
+    /
+    *
+    close: bool = False
+[clinic start generated code]*/
+
+static PyObject *
+_io__Buffered_read_impl(buffered *self, Py_ssize_t n, int close)
+/*[clinic end generated code: output=4c95a3482cbff01f input=2ec993890e34f35f]*/
+{
+    PyObject *result = buffered_read_internal(self, n);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /*[clinic input]
@@ -1167,13 +1187,16 @@ end:
 _io._Buffered.readinto
     buffer: Py_buffer(accept={rwbuffer})
     /
+    *
+    close: bool = False
 [clinic start generated code]*/
 
 static PyObject *
-_io__Buffered_readinto_impl(buffered *self, Py_buffer *buffer)
-/*[clinic end generated code: output=bcb376580b1d8170 input=777c33e7adaa2bcd]*/
+_io__Buffered_readinto_impl(buffered *self, Py_buffer *buffer, int close)
+/*[clinic end generated code: output=f69ec1b7727e9b6a input=5c40b08508f673b1]*/
 {
-    return _buffered_readinto_generic(self, buffer, 0);
+    PyObject *result = _buffered_readinto_generic(self, buffer, 0);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /*[clinic input]
@@ -1181,13 +1204,16 @@ _io__Buffered_readinto_impl(buffered *self, Py_buffer *buffer)
 _io._Buffered.readinto1
     buffer: Py_buffer(accept={rwbuffer})
     /
+    *
+    close: bool = False
 [clinic start generated code]*/
 
 static PyObject *
-_io__Buffered_readinto1_impl(buffered *self, Py_buffer *buffer)
-/*[clinic end generated code: output=6e5c6ac5868205d6 input=ef03cc5fc92a6895]*/
+_io__Buffered_readinto1_impl(buffered *self, Py_buffer *buffer, int close)
+/*[clinic end generated code: output=7638c06291df9023 input=350de6e913b2606b]*/
 {
-    return _buffered_readinto_generic(self, buffer, 1);
+    PyObject *result = _buffered_readinto_generic(self, buffer, 1);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 

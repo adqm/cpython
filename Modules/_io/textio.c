@@ -76,6 +76,8 @@ _io._TextIOBase.read
     cls: defining_class
     size: int(unused=True) = -1
     /
+    *
+    close: bool = False
 
 Read at most size characters from stream.
 
@@ -85,8 +87,8 @@ If size is negative or omitted, read until EOF.
 
 static PyObject *
 _io__TextIOBase_read_impl(PyObject *self, PyTypeObject *cls,
-                          int Py_UNUSED(size))
-/*[clinic end generated code: output=51a5178a309ce647 input=f5e37720f9fc563f]*/
+                          int Py_UNUSED(size), int close)
+/*[clinic end generated code: output=f8fd509ca234e6a0 input=32b98a826c8b4e8e]*/
 {
     _PyIO_State *state = get_io_state_by_cls(cls);
     return _unsupported(state, "read");
@@ -1974,16 +1976,8 @@ textiowrapper_read_chunk(textio *self, Py_ssize_t size_hint)
     return -1;
 }
 
-/*[clinic input]
-@critical_section
-_io.TextIOWrapper.read
-    size as n: Py_ssize_t(accept={int, NoneType}) = -1
-    /
-[clinic start generated code]*/
-
 static PyObject *
-_io_TextIOWrapper_read_impl(textio *self, Py_ssize_t n)
-/*[clinic end generated code: output=7e651ce6cc6a25a6 input=67d14c5661121377]*/
+textiowrapper_read_internal(textio *self, Py_ssize_t n)
 {
     PyObject *result = NULL, *chunks = NULL;
 
@@ -2089,6 +2083,24 @@ _io_TextIOWrapper_read_impl(textio *self, Py_ssize_t n)
     Py_XDECREF(result);
     Py_XDECREF(chunks);
     return NULL;
+}
+
+
+/*[clinic input]
+@critical_section
+_io.TextIOWrapper.read
+    size as n: Py_ssize_t(accept={int, NoneType}) = -1
+    /
+    *
+    close: bool = False
+[clinic start generated code]*/
+
+static PyObject *
+_io_TextIOWrapper_read_impl(textio *self, Py_ssize_t n, int close)
+/*[clinic end generated code: output=49fd74a9b235574f input=f04871bfd9f8e7ad]*/
+{
+    PyObject *result = textiowrapper_read_internal(self, n);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 

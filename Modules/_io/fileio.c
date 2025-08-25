@@ -843,28 +843,8 @@ _io_FileIO_readall_impl(fileio *self)
     return result;
 }
 
-/*[clinic input]
-@permit_long_docstring_body
-_io.FileIO.read
-    cls: defining_class
-    size: Py_ssize_t(accept={int, NoneType}) = -1
-    /
-
-Read at most size bytes, returned as bytes.
-
-If size is less than 0, read all bytes in the file making multiple read calls.
-See ``FileIO.readall``.
-
-Attempts to make only one system call, retrying only per PEP 475 (EINTR). This
-means less data may be returned than requested.
-
-In non-blocking mode, returns None if no data is available. Return an empty
-bytes object at EOF.
-[clinic start generated code]*/
-
 static PyObject *
-_io_FileIO_read_impl(fileio *self, PyTypeObject *cls, Py_ssize_t size)
-/*[clinic end generated code: output=bbd749c7c224143e input=752d1ad3db8564a5]*/
+fileio_read_internal(fileio *self, PyTypeObject *cls, Py_ssize_t size)
 {
     char *ptr;
     Py_ssize_t n;
@@ -909,6 +889,36 @@ _io_FileIO_read_impl(fileio *self, PyTypeObject *cls, Py_ssize_t size)
     }
 
     return (PyObject *) bytes;
+}
+
+/*[clinic input]
+@permit_long_docstring_body
+_io.FileIO.read
+    cls: defining_class
+    size: Py_ssize_t(accept={int, NoneType}) = -1
+    /
+    *
+    close: bool = False
+
+Read at most size bytes, returned as bytes.
+
+If size is less than 0, read all bytes in the file making multiple read calls.
+See ``FileIO.readall``.
+
+Attempts to make only one system call, retrying only per PEP 475 (EINTR). This
+means less data may be returned than requested.
+
+In non-blocking mode, returns None if no data is available. Return an empty
+bytes object at EOF.
+[clinic start generated code]*/
+
+static PyObject *
+_io_FileIO_read_impl(fileio *self, PyTypeObject *cls, Py_ssize_t size,
+                     int close)
+/*[clinic end generated code: output=4ec23abbf99fde97 input=f5ae3511e9472fea]*/
+{
+    PyObject *result = fileio_read_internal(self, cls, size);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /*[clinic input]

@@ -4,35 +4,79 @@ preserve
 
 #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 #  include "pycore_gc.h"          // PyGC_Head
-#  include "pycore_runtime.h"     // _Py_SINGLETON()
+#  include "pycore_runtime.h"     // _Py_ID()
 #endif
 #include "pycore_abstract.h"      // _PyNumber_Index()
 #include "pycore_critical_section.h"// Py_BEGIN_CRITICAL_SECTION()
-#include "pycore_modsupport.h"    // _PyArg_BadArgument()
+#include "pycore_modsupport.h"    // _PyArg_UnpackKeywords()
 
 PyDoc_STRVAR(_io__BufferedIOBase_readinto__doc__,
-"readinto($self, buffer, /)\n"
+"readinto($self, buffer, /, *, close=False)\n"
 "--\n"
 "\n");
 
 #define _IO__BUFFEREDIOBASE_READINTO_METHODDEF    \
-    {"readinto", (PyCFunction)_io__BufferedIOBase_readinto, METH_O, _io__BufferedIOBase_readinto__doc__},
+    {"readinto", _PyCFunction_CAST(_io__BufferedIOBase_readinto), METH_FASTCALL|METH_KEYWORDS, _io__BufferedIOBase_readinto__doc__},
 
 static PyObject *
-_io__BufferedIOBase_readinto_impl(PyObject *self, Py_buffer *buffer);
+_io__BufferedIOBase_readinto_impl(PyObject *self, Py_buffer *buffer,
+                                  int close);
 
 static PyObject *
-_io__BufferedIOBase_readinto(PyObject *self, PyObject *arg)
+_io__BufferedIOBase_readinto(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
-    Py_buffer buffer = {NULL, NULL};
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 
-    if (PyObject_GetBuffer(arg, &buffer, PyBUF_WRITABLE) < 0) {
-        _PyArg_BadArgument("readinto", "argument", "read-write bytes-like object", arg);
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "readinto",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
+    Py_buffer buffer = {NULL, NULL};
+    int close = 0;
+
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 1, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
+    if (PyObject_GetBuffer(args[0], &buffer, PyBUF_WRITABLE) < 0) {
+        _PyArg_BadArgument("readinto", "argument 1", "read-write bytes-like object", args[0]);
+        goto exit;
+    }
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _io__BufferedIOBase_readinto_impl(self, &buffer);
+    return_value = _io__BufferedIOBase_readinto_impl(self, &buffer, close);
     Py_END_CRITICAL_SECTION();
 
 exit:
@@ -104,7 +148,7 @@ _io__BufferedIOBase_detach(PyObject *self, PyTypeObject *cls, PyObject *const *a
 }
 
 PyDoc_STRVAR(_io__BufferedIOBase_read__doc__,
-"read($self, size=-1, /)\n"
+"read($self, size=-1, /, *, close=False)\n"
 "--\n"
 "\n"
 "Read and return up to n bytes.\n"
@@ -129,27 +173,43 @@ PyDoc_STRVAR(_io__BufferedIOBase_read__doc__,
 
 static PyObject *
 _io__BufferedIOBase_read_impl(PyObject *self, PyTypeObject *cls,
-                              int Py_UNUSED(size));
+                              int Py_UNUSED(size), int close);
 
 static PyObject *
 _io__BufferedIOBase_read(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
     #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
-    #  define KWTUPLE (PyObject *)&_Py_SINGLETON(tuple_empty)
-    #else
-    #  define KWTUPLE NULL
-    #endif
 
-    static const char * const _keywords[] = {"", NULL};
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
     static _PyArg_Parser _parser = {
         .keywords = _keywords,
         .fname = "read",
         .kwtuple = KWTUPLE,
     };
     #undef KWTUPLE
-    PyObject *argsbuf[1];
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     int size = -1;
+    int close = 0;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -159,19 +219,28 @@ _io__BufferedIOBase_read(PyObject *self, PyTypeObject *cls, PyObject *const *arg
     if (nargs < 1) {
         goto skip_optional_posonly;
     }
+    noptargs--;
     size = PyLong_AsInt(args[0]);
     if (size == -1 && PyErr_Occurred()) {
         goto exit;
     }
 skip_optional_posonly:
-    return_value = _io__BufferedIOBase_read_impl(self, cls, size);
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
+    return_value = _io__BufferedIOBase_read_impl(self, cls, size, close);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_io__BufferedIOBase_read1__doc__,
-"read1($self, size=-1, /)\n"
+"read1($self, size=-1, /, *, close=False)\n"
 "--\n"
 "\n"
 "Read and return up to size bytes, with at most one read() call to the underlying raw stream.\n"
@@ -184,27 +253,43 @@ PyDoc_STRVAR(_io__BufferedIOBase_read1__doc__,
 
 static PyObject *
 _io__BufferedIOBase_read1_impl(PyObject *self, PyTypeObject *cls,
-                               int Py_UNUSED(size));
+                               int Py_UNUSED(size), int close);
 
 static PyObject *
 _io__BufferedIOBase_read1(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
     #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
-    #  define KWTUPLE (PyObject *)&_Py_SINGLETON(tuple_empty)
-    #else
-    #  define KWTUPLE NULL
-    #endif
 
-    static const char * const _keywords[] = {"", NULL};
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
     static _PyArg_Parser _parser = {
         .keywords = _keywords,
         .fname = "read1",
         .kwtuple = KWTUPLE,
     };
     #undef KWTUPLE
-    PyObject *argsbuf[1];
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     int size = -1;
+    int close = 0;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -214,12 +299,21 @@ _io__BufferedIOBase_read1(PyObject *self, PyTypeObject *cls, PyObject *const *ar
     if (nargs < 1) {
         goto skip_optional_posonly;
     }
+    noptargs--;
     size = PyLong_AsInt(args[0]);
     if (size == -1 && PyErr_Occurred()) {
         goto exit;
     }
 skip_optional_posonly:
-    return_value = _io__BufferedIOBase_read1_impl(self, cls, size);
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
+    return_value = _io__BufferedIOBase_read1_impl(self, cls, size, close);
 
 exit:
     return return_value;
@@ -647,34 +741,75 @@ exit:
 }
 
 PyDoc_STRVAR(_io__Buffered_read__doc__,
-"read($self, size=-1, /)\n"
+"read($self, size=-1, /, *, close=False)\n"
 "--\n"
 "\n");
 
 #define _IO__BUFFERED_READ_METHODDEF    \
-    {"read", _PyCFunction_CAST(_io__Buffered_read), METH_FASTCALL, _io__Buffered_read__doc__},
+    {"read", _PyCFunction_CAST(_io__Buffered_read), METH_FASTCALL|METH_KEYWORDS, _io__Buffered_read__doc__},
 
 static PyObject *
-_io__Buffered_read_impl(buffered *self, Py_ssize_t n);
+_io__Buffered_read_impl(buffered *self, Py_ssize_t n, int close);
 
 static PyObject *
-_io__Buffered_read(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+_io__Buffered_read(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
-    Py_ssize_t n = -1;
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 
-    if (!_PyArg_CheckPositional("read", nargs, 0, 1)) {
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "read",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
+    Py_ssize_t n = -1;
+    int close = 0;
+
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
     if (nargs < 1) {
-        goto skip_optional;
+        goto skip_optional_posonly;
     }
+    noptargs--;
     if (!_Py_convert_optional_to_ssize_t(args[0], &n)) {
         goto exit;
     }
-skip_optional:
+skip_optional_posonly:
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _io__Buffered_read_impl((buffered *)self, n);
+    return_value = _io__Buffered_read_impl((buffered *)self, n, close);
     Py_END_CRITICAL_SECTION();
 
 exit:
@@ -726,28 +861,71 @@ exit:
 }
 
 PyDoc_STRVAR(_io__Buffered_readinto__doc__,
-"readinto($self, buffer, /)\n"
+"readinto($self, buffer, /, *, close=False)\n"
 "--\n"
 "\n");
 
 #define _IO__BUFFERED_READINTO_METHODDEF    \
-    {"readinto", (PyCFunction)_io__Buffered_readinto, METH_O, _io__Buffered_readinto__doc__},
+    {"readinto", _PyCFunction_CAST(_io__Buffered_readinto), METH_FASTCALL|METH_KEYWORDS, _io__Buffered_readinto__doc__},
 
 static PyObject *
-_io__Buffered_readinto_impl(buffered *self, Py_buffer *buffer);
+_io__Buffered_readinto_impl(buffered *self, Py_buffer *buffer, int close);
 
 static PyObject *
-_io__Buffered_readinto(PyObject *self, PyObject *arg)
+_io__Buffered_readinto(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
-    Py_buffer buffer = {NULL, NULL};
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 
-    if (PyObject_GetBuffer(arg, &buffer, PyBUF_WRITABLE) < 0) {
-        _PyArg_BadArgument("readinto", "argument", "read-write bytes-like object", arg);
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "readinto",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
+    Py_buffer buffer = {NULL, NULL};
+    int close = 0;
+
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 1, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
+    if (PyObject_GetBuffer(args[0], &buffer, PyBUF_WRITABLE) < 0) {
+        _PyArg_BadArgument("readinto", "argument 1", "read-write bytes-like object", args[0]);
+        goto exit;
+    }
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _io__Buffered_readinto_impl((buffered *)self, &buffer);
+    return_value = _io__Buffered_readinto_impl((buffered *)self, &buffer, close);
     Py_END_CRITICAL_SECTION();
 
 exit:
@@ -760,28 +938,71 @@ exit:
 }
 
 PyDoc_STRVAR(_io__Buffered_readinto1__doc__,
-"readinto1($self, buffer, /)\n"
+"readinto1($self, buffer, /, *, close=False)\n"
 "--\n"
 "\n");
 
 #define _IO__BUFFERED_READINTO1_METHODDEF    \
-    {"readinto1", (PyCFunction)_io__Buffered_readinto1, METH_O, _io__Buffered_readinto1__doc__},
+    {"readinto1", _PyCFunction_CAST(_io__Buffered_readinto1), METH_FASTCALL|METH_KEYWORDS, _io__Buffered_readinto1__doc__},
 
 static PyObject *
-_io__Buffered_readinto1_impl(buffered *self, Py_buffer *buffer);
+_io__Buffered_readinto1_impl(buffered *self, Py_buffer *buffer, int close);
 
 static PyObject *
-_io__Buffered_readinto1(PyObject *self, PyObject *arg)
+_io__Buffered_readinto1(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
-    Py_buffer buffer = {NULL, NULL};
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 
-    if (PyObject_GetBuffer(arg, &buffer, PyBUF_WRITABLE) < 0) {
-        _PyArg_BadArgument("readinto1", "argument", "read-write bytes-like object", arg);
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "readinto1",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
+    Py_buffer buffer = {NULL, NULL};
+    int close = 0;
+
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 1, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
+    if (PyObject_GetBuffer(args[0], &buffer, PyBUF_WRITABLE) < 0) {
+        _PyArg_BadArgument("readinto1", "argument 1", "read-write bytes-like object", args[0]);
+        goto exit;
+    }
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _io__Buffered_readinto1_impl((buffered *)self, &buffer);
+    return_value = _io__Buffered_readinto1_impl((buffered *)self, &buffer, close);
     Py_END_CRITICAL_SECTION();
 
 exit:
@@ -1265,4 +1486,4 @@ skip_optional_pos:
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=3ee17211d2010462 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=3d90c61a0e5c4438 input=a9049054013a1b77]*/

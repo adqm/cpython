@@ -745,3 +745,37 @@ PyInit__io(void)
 {
     return PyModuleDef_Init(&_PyIO_Module);
 }
+
+PyObject *
+io_maybe_close_after_op(PyObject *self, PyObject *result, int close)
+{
+    if (!close) {
+        return result;
+    }
+
+    if (result != NULL) {
+        // success.  try to close, error if this fails
+        PyObject *r = _PyObject_CallMethodNoArgs(self, &_Py_ID(close));
+        if (r == NULL) {
+            Py_DECREF(result);
+            return NULL;
+        }
+        Py_DECREF(r);
+        return result;
+    }
+
+    PyObject *type, *value, *tb;
+    PyErr_Fetch(&type, &value, &tb);
+
+    PyObject *r = _PyObject_CallMethodNoArgs(self, &_Py_ID(close));
+    if (r == NULL) {
+        PyObject *ct, *cv, *ctb;
+        PyErr_Fetch(&ct, &cv, &ctb);
+        _PyErr_ChainExceptions(ct, cv, ctb);
+    } else {
+        Py_DECREF(r);
+    }
+
+    PyErr_Restore(type, value, tb);
+    return result;
+}

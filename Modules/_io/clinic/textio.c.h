@@ -4,7 +4,7 @@ preserve
 
 #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 #  include "pycore_gc.h"          // PyGC_Head
-#  include "pycore_runtime.h"     // _Py_SINGLETON()
+#  include "pycore_runtime.h"     // _Py_ID()
 #endif
 #include "pycore_abstract.h"      // _Py_convert_optional_to_ssize_t()
 #include "pycore_critical_section.h"// Py_BEGIN_CRITICAL_SECTION()
@@ -35,7 +35,7 @@ _io__TextIOBase_detach(PyObject *self, PyTypeObject *cls, PyObject *const *args,
 }
 
 PyDoc_STRVAR(_io__TextIOBase_read__doc__,
-"read($self, size=-1, /)\n"
+"read($self, size=-1, /, *, close=False)\n"
 "--\n"
 "\n"
 "Read at most size characters from stream.\n"
@@ -48,27 +48,43 @@ PyDoc_STRVAR(_io__TextIOBase_read__doc__,
 
 static PyObject *
 _io__TextIOBase_read_impl(PyObject *self, PyTypeObject *cls,
-                          int Py_UNUSED(size));
+                          int Py_UNUSED(size), int close);
 
 static PyObject *
 _io__TextIOBase_read(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
     #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
-    #  define KWTUPLE (PyObject *)&_Py_SINGLETON(tuple_empty)
-    #else
-    #  define KWTUPLE NULL
-    #endif
 
-    static const char * const _keywords[] = {"", NULL};
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
     static _PyArg_Parser _parser = {
         .keywords = _keywords,
         .fname = "read",
         .kwtuple = KWTUPLE,
     };
     #undef KWTUPLE
-    PyObject *argsbuf[1];
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     int size = -1;
+    int close = 0;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -78,12 +94,21 @@ _io__TextIOBase_read(PyObject *self, PyTypeObject *cls, PyObject *const *args, P
     if (nargs < 1) {
         goto skip_optional_posonly;
     }
+    noptargs--;
     size = PyLong_AsInt(args[0]);
     if (size == -1 && PyErr_Occurred()) {
         goto exit;
     }
 skip_optional_posonly:
-    return_value = _io__TextIOBase_read_impl(self, cls, size);
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
+    return_value = _io__TextIOBase_read_impl(self, cls, size, close);
 
 exit:
     return return_value;
@@ -808,34 +833,75 @@ exit:
 }
 
 PyDoc_STRVAR(_io_TextIOWrapper_read__doc__,
-"read($self, size=-1, /)\n"
+"read($self, size=-1, /, *, close=False)\n"
 "--\n"
 "\n");
 
 #define _IO_TEXTIOWRAPPER_READ_METHODDEF    \
-    {"read", _PyCFunction_CAST(_io_TextIOWrapper_read), METH_FASTCALL, _io_TextIOWrapper_read__doc__},
+    {"read", _PyCFunction_CAST(_io_TextIOWrapper_read), METH_FASTCALL|METH_KEYWORDS, _io_TextIOWrapper_read__doc__},
 
 static PyObject *
-_io_TextIOWrapper_read_impl(textio *self, Py_ssize_t n);
+_io_TextIOWrapper_read_impl(textio *self, Py_ssize_t n, int close);
 
 static PyObject *
-_io_TextIOWrapper_read(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+_io_TextIOWrapper_read(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
-    Py_ssize_t n = -1;
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 
-    if (!_PyArg_CheckPositional("read", nargs, 0, 1)) {
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "read",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
+    Py_ssize_t n = -1;
+    int close = 0;
+
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
     if (nargs < 1) {
-        goto skip_optional;
+        goto skip_optional_posonly;
     }
+    noptargs--;
     if (!_Py_convert_optional_to_ssize_t(args[0], &n)) {
         goto exit;
     }
-skip_optional:
+skip_optional_posonly:
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _io_TextIOWrapper_read_impl((textio *)self, n);
+    return_value = _io_TextIOWrapper_read_impl((textio *)self, n, close);
     Py_END_CRITICAL_SECTION();
 
 exit:
@@ -1312,4 +1378,4 @@ _io_TextIOWrapper__CHUNK_SIZE_set(PyObject *self, PyObject *value, void *Py_UNUS
 
     return return_value;
 }
-/*[clinic end generated code: output=30404271a1151056 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=17df238b58fb078b input=a9049054013a1b77]*/

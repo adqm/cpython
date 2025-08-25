@@ -289,7 +289,7 @@ _io_FileIO_readall(PyObject *self, PyObject *Py_UNUSED(ignored))
 }
 
 PyDoc_STRVAR(_io_FileIO_read__doc__,
-"read($self, size=-1, /)\n"
+"read($self, size=-1, /, *, close=False)\n"
 "--\n"
 "\n"
 "Read at most size bytes, returned as bytes.\n"
@@ -307,27 +307,44 @@ PyDoc_STRVAR(_io_FileIO_read__doc__,
     {"read", _PyCFunction_CAST(_io_FileIO_read), METH_METHOD|METH_FASTCALL|METH_KEYWORDS, _io_FileIO_read__doc__},
 
 static PyObject *
-_io_FileIO_read_impl(fileio *self, PyTypeObject *cls, Py_ssize_t size);
+_io_FileIO_read_impl(fileio *self, PyTypeObject *cls, Py_ssize_t size,
+                     int close);
 
 static PyObject *
 _io_FileIO_read(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
     #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
-    #  define KWTUPLE (PyObject *)&_Py_SINGLETON(tuple_empty)
-    #else
-    #  define KWTUPLE NULL
-    #endif
 
-    static const char * const _keywords[] = {"", NULL};
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
     static _PyArg_Parser _parser = {
         .keywords = _keywords,
         .fname = "read",
         .kwtuple = KWTUPLE,
     };
     #undef KWTUPLE
-    PyObject *argsbuf[1];
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     Py_ssize_t size = -1;
+    int close = 0;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -337,11 +354,20 @@ _io_FileIO_read(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py_ssi
     if (nargs < 1) {
         goto skip_optional_posonly;
     }
+    noptargs--;
     if (!_Py_convert_optional_to_ssize_t(args[0], &size)) {
         goto exit;
     }
 skip_optional_posonly:
-    return_value = _io_FileIO_read_impl((fileio *)self, cls, size);
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
+    return_value = _io_FileIO_read_impl((fileio *)self, cls, size, close);
 
 exit:
     return return_value;
@@ -543,4 +569,4 @@ _io_FileIO_isatty(PyObject *self, PyObject *Py_UNUSED(ignored))
 #ifndef _IO_FILEIO_TRUNCATE_METHODDEF
     #define _IO_FILEIO_TRUNCATE_METHODDEF
 #endif /* !defined(_IO_FILEIO_TRUNCATE_METHODDEF) */
-/*[clinic end generated code: output=1902fac9e39358aa input=a9049054013a1b77]*/
+/*[clinic end generated code: output=bb182dfe5adcaf18 input=a9049054013a1b77]*/
