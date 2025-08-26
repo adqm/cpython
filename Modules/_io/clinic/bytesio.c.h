@@ -410,7 +410,7 @@ exit:
 }
 
 PyDoc_STRVAR(_io_BytesIO_readlines__doc__,
-"readlines($self, size=None, /)\n"
+"readlines($self, size=None, /, *, close=False)\n"
 "--\n"
 "\n"
 "List of bytes objects, each a line from the file.\n"
@@ -420,27 +420,68 @@ PyDoc_STRVAR(_io_BytesIO_readlines__doc__,
 "total number of bytes in the lines returned.");
 
 #define _IO_BYTESIO_READLINES_METHODDEF    \
-    {"readlines", _PyCFunction_CAST(_io_BytesIO_readlines), METH_FASTCALL, _io_BytesIO_readlines__doc__},
+    {"readlines", _PyCFunction_CAST(_io_BytesIO_readlines), METH_FASTCALL|METH_KEYWORDS, _io_BytesIO_readlines__doc__},
 
 static PyObject *
-_io_BytesIO_readlines_impl(bytesio *self, PyObject *arg);
+_io_BytesIO_readlines_impl(bytesio *self, PyObject *arg, int close);
 
 static PyObject *
-_io_BytesIO_readlines(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+_io_BytesIO_readlines(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
-    PyObject *arg = Py_None;
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 
-    if (!_PyArg_CheckPositional("readlines", nargs, 0, 1)) {
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "readlines",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
+    PyObject *arg = Py_None;
+    int close = 0;
+
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
     if (nargs < 1) {
-        goto skip_optional;
+        goto skip_optional_posonly;
     }
+    noptargs--;
     arg = args[0];
-skip_optional:
+skip_optional_posonly:
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _io_BytesIO_readlines_impl((bytesio *)self, arg);
+    return_value = _io_BytesIO_readlines_impl((bytesio *)self, arg, close);
     Py_END_CRITICAL_SECTION();
 
 exit:
@@ -719,4 +760,4 @@ skip_optional_pos:
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=85c5bf8f7a2adb03 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=f66ddaaaa7cb1318 input=a9049054013a1b77]*/

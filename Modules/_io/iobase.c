@@ -700,22 +700,8 @@ iobase_iternext(PyObject *self)
     return line;
 }
 
-/*[clinic input]
-_io._IOBase.readlines
-    hint: Py_ssize_t(accept={int, NoneType}) = -1
-    /
-
-Return a list of lines from the stream.
-
-hint can be specified to control the number of lines read: no more
-lines will be read if the total size (in bytes/characters) of all
-lines so far exceeds hint.
-[clinic start generated code]*/
-
 static PyObject *
-_io__IOBase_readlines_impl(PyObject *self, Py_ssize_t hint)
-/*[clinic end generated code: output=2f50421677fa3dea input=9400c786ea9dc416]*/
-{
+iobase_readlines_internal(PyObject *self, Py_ssize_t hint) {
     Py_ssize_t length = 0;
     PyObject *result, *it = NULL;
 
@@ -773,6 +759,28 @@ _io__IOBase_readlines_impl(PyObject *self, Py_ssize_t hint)
     Py_XDECREF(it);
     Py_DECREF(result);
     return NULL;
+}
+
+/*[clinic input]
+_io._IOBase.readlines
+    hint: Py_ssize_t(accept={int, NoneType}) = -1
+    /
+    *
+    close: bool = False
+
+Return a list of lines from the stream.
+
+hint can be specified to control the number of lines read: no more
+lines will be read if the total size (in bytes/characters) of all
+lines so far exceeds hint.
+[clinic start generated code]*/
+
+static PyObject *
+_io__IOBase_readlines_impl(PyObject *self, Py_ssize_t hint, int close)
+/*[clinic end generated code: output=33bb1a4289efc562 input=4e7181b26c706d76]*/
+{
+    PyObject *result = iobase_readlines_internal(self, hint);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /*[clinic input]

@@ -2375,14 +2375,17 @@ _textiowrapper_readline(textio *self, Py_ssize_t limit)
 _io.TextIOWrapper.readline
     size: Py_ssize_t = -1
     /
+    *
+    close: bool = False
 [clinic start generated code]*/
 
 static PyObject *
-_io_TextIOWrapper_readline_impl(textio *self, Py_ssize_t size)
-/*[clinic end generated code: output=344afa98804e8b25 input=b65bab871dc3ddba]*/
+_io_TextIOWrapper_readline_impl(textio *self, Py_ssize_t size, int close)
+/*[clinic end generated code: output=5900011e692334d5 input=e298b459e8e3e539]*/
 {
     CHECK_ATTACHED(self);
-    return _textiowrapper_readline(self, size);
+    PyObject *result =  _textiowrapper_readline(self, size);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /* Seek and Tell */

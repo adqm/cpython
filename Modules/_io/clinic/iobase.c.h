@@ -3,6 +3,7 @@ preserve
 [clinic start generated code]*/
 
 #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
+#  include "pycore_gc.h"          // PyGC_Head
 #  include "pycore_runtime.h"     // _Py_SINGLETON()
 #endif
 #include "pycore_abstract.h"      // _Py_convert_optional_to_ssize_t()
@@ -335,7 +336,7 @@ exit:
 }
 
 PyDoc_STRVAR(_io__IOBase_readlines__doc__,
-"readlines($self, hint=-1, /)\n"
+"readlines($self, hint=-1, /, *, close=False)\n"
 "--\n"
 "\n"
 "Return a list of lines from the stream.\n"
@@ -345,28 +346,69 @@ PyDoc_STRVAR(_io__IOBase_readlines__doc__,
 "lines so far exceeds hint.");
 
 #define _IO__IOBASE_READLINES_METHODDEF    \
-    {"readlines", _PyCFunction_CAST(_io__IOBase_readlines), METH_FASTCALL, _io__IOBase_readlines__doc__},
+    {"readlines", _PyCFunction_CAST(_io__IOBase_readlines), METH_FASTCALL|METH_KEYWORDS, _io__IOBase_readlines__doc__},
 
 static PyObject *
-_io__IOBase_readlines_impl(PyObject *self, Py_ssize_t hint);
+_io__IOBase_readlines_impl(PyObject *self, Py_ssize_t hint, int close);
 
 static PyObject *
-_io__IOBase_readlines(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+_io__IOBase_readlines(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
-    Py_ssize_t hint = -1;
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
 
-    if (!_PyArg_CheckPositional("readlines", nargs, 0, 1)) {
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(close), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"", "close", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "readlines",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
+    Py_ssize_t hint = -1;
+    int close = 0;
+
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
     if (nargs < 1) {
-        goto skip_optional;
+        goto skip_optional_posonly;
     }
+    noptargs--;
     if (!_Py_convert_optional_to_ssize_t(args[0], &hint)) {
         goto exit;
     }
-skip_optional:
-    return_value = _io__IOBase_readlines_impl(self, hint);
+skip_optional_posonly:
+    if (!noptargs) {
+        goto skip_optional_kwonly;
+    }
+    close = PyObject_IsTrue(args[1]);
+    if (close < 0) {
+        goto exit;
+    }
+skip_optional_kwonly:
+    return_value = _io__IOBase_readlines_impl(self, hint, close);
 
 exit:
     return return_value;
@@ -443,4 +485,4 @@ _io__RawIOBase_readall(PyObject *self, PyObject *Py_UNUSED(ignored))
 {
     return _io__RawIOBase_readall_impl(self);
 }
-/*[clinic end generated code: output=9359e74d95534bef input=a9049054013a1b77]*/
+/*[clinic end generated code: output=c721ff851c1af71d input=a9049054013a1b77]*/

@@ -1330,14 +1330,17 @@ end_unlocked:
 _io._Buffered.readline
     size: Py_ssize_t(accept={int, NoneType}) = -1
     /
+    *
+    close: bool = False
 [clinic start generated code]*/
 
 static PyObject *
-_io__Buffered_readline_impl(buffered *self, Py_ssize_t size)
-/*[clinic end generated code: output=24dd2aa6e33be83c input=e81ca5abd4280776]*/
+_io__Buffered_readline_impl(buffered *self, Py_ssize_t size, int close)
+/*[clinic end generated code: output=f7c0dd5810bec39b input=647acd2ee5bd64b9]*/
 {
     CHECK_INITIALIZED(self)
-    return _buffered_readline(self, size);
+    PyObject *result = _buffered_readline(self, size);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 

@@ -529,22 +529,8 @@ _io_BytesIO_readline_impl(bytesio *self, Py_ssize_t size)
     return read_bytes_lock_held(self, n);
 }
 
-/*[clinic input]
-@critical_section
-_io.BytesIO.readlines
-    size as arg: object = None
-    /
-
-List of bytes objects, each a line from the file.
-
-Call readline() repeatedly and return a list of the lines so read.
-The optional size argument, if given, is an approximate bound on the
-total number of bytes in the lines returned.
-[clinic start generated code]*/
-
 static PyObject *
-_io_BytesIO_readlines_impl(bytesio *self, PyObject *arg)
-/*[clinic end generated code: output=09b8e34c880808ff input=5c57d7d78e409985]*/
+bytesio_readlines_internal(bytesio *self, PyObject *arg)
 {
     Py_ssize_t maxsize, size, n;
     PyObject *result, *line;
@@ -593,6 +579,29 @@ _io_BytesIO_readlines_impl(bytesio *self, PyObject *arg)
   on_error:
     Py_DECREF(result);
     return NULL;
+}
+
+/*[clinic input]
+@critical_section
+_io.BytesIO.readlines
+    size as arg: object = None
+    /
+    *
+    close: bool = False
+
+List of bytes objects, each a line from the file.
+
+Call readline() repeatedly and return a list of the lines so read.
+The optional size argument, if given, is an approximate bound on the
+total number of bytes in the lines returned.
+[clinic start generated code]*/
+
+static PyObject *
+_io_BytesIO_readlines_impl(bytesio *self, PyObject *arg, int close)
+/*[clinic end generated code: output=2ae392552c2dd5dc input=ef03174c2e1d025a]*/
+{
+    PyObject *result = bytesio_readlines_internal(self, arg);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /*[clinic input]
