@@ -309,21 +309,8 @@ _io_StringIO_tell_impl(stringio *self)
     return PyLong_FromSsize_t(self->pos);
 }
 
-/*[clinic input]
-@critical_section
-_io.StringIO.read
-    size: Py_ssize_t(accept={int, NoneType}) = -1
-    /
-
-Read at most size characters, returned as a string.
-
-If the argument is negative or omitted, read until EOF
-is reached. Return an empty string at EOF.
-[clinic start generated code]*/
-
 static PyObject *
-_io_StringIO_read_impl(stringio *self, Py_ssize_t size)
-/*[clinic end generated code: output=ae8cf6002f71626c input=9fbef45d8aece8e7]*/
+_stringio_read_internal(stringio *self, Py_ssize_t size)
 {
     Py_ssize_t n;
     Py_UCS4 *output;
@@ -350,6 +337,28 @@ _io_StringIO_read_impl(stringio *self, Py_ssize_t size)
     output = self->buf + self->pos;
     self->pos += size;
     return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, output, size);
+}
+
+/*[clinic input]
+@critical_section
+_io.StringIO.read
+    size: Py_ssize_t(accept={int, NoneType}) = -1
+    /
+    *
+    close: bool = False
+
+Read at most size characters, returned as a string.
+
+If the argument is negative or omitted, read until EOF
+is reached. Return an empty string at EOF.
+[clinic start generated code]*/
+
+static PyObject *
+_io_StringIO_read_impl(stringio *self, Py_ssize_t size, int close)
+/*[clinic end generated code: output=740238497737b320 input=dd46b8254393a53b]*/
+{
+    PyObject *result = _stringio_read_internal(self, size);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
 }
 
 /* Internal helper, used by stringio_readline and stringio_iternext */

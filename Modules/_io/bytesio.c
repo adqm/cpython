@@ -441,21 +441,8 @@ read_bytes_lock_held(bytesio *self, Py_ssize_t size)
     return PyBytes_FromStringAndSize(output, size);
 }
 
-/*[clinic input]
-@critical_section
-_io.BytesIO.read
-    size: Py_ssize_t(accept={int, NoneType}) = -1
-    /
-
-Read at most size bytes, returned as a bytes object.
-
-If the size argument is negative, read until EOF is reached.
-Return an empty bytes object at EOF.
-[clinic start generated code]*/
-
 static PyObject *
-_io_BytesIO_read_impl(bytesio *self, Py_ssize_t size)
-/*[clinic end generated code: output=9cc025f21c75bdd2 input=9e2f7ff3075fdd39]*/
+_bytesio_read_internal(bytesio *self, Py_ssize_t size)
 {
     Py_ssize_t n;
 
@@ -472,12 +459,36 @@ _io_BytesIO_read_impl(bytesio *self, Py_ssize_t size)
     return read_bytes_lock_held(self, size);
 }
 
+/*[clinic input]
+@critical_section
+_io.BytesIO.read
+    size: Py_ssize_t(accept={int, NoneType}) = -1
+    /
+    *
+    close: bool = False
+
+Read at most size bytes, returned as a bytes object.
+
+If the size argument is negative, read until EOF is reached.
+Return an empty bytes object at EOF.
+[clinic start generated code]*/
+
+static PyObject *
+_io_BytesIO_read_impl(bytesio *self, Py_ssize_t size, int close)
+/*[clinic end generated code: output=03c859a57d6f448b input=4ce044aacf0f19ea]*/
+{
+    PyObject *result = _bytesio_read_internal(self, size);
+    return io_maybe_close_after_op((PyObject *)self, result, close);
+}
+
 
 /*[clinic input]
 @critical_section
 _io.BytesIO.read1
     size: Py_ssize_t(accept={int, NoneType}) = -1
     /
+    *
+    close: bool = False
 
 Read at most size bytes, returned as a bytes object.
 
@@ -486,10 +497,10 @@ Return an empty bytes object at EOF.
 [clinic start generated code]*/
 
 static PyObject *
-_io_BytesIO_read1_impl(bytesio *self, Py_ssize_t size)
-/*[clinic end generated code: output=d0f843285aa95f1c input=a08fc9e507ab380c]*/
+_io_BytesIO_read1_impl(bytesio *self, Py_ssize_t size, int close)
+/*[clinic end generated code: output=71bc0a45f1239e14 input=de3f9b6a1e318cf0]*/
 {
-    return _io_BytesIO_read_impl(self, size);
+    return _io_BytesIO_read_impl(self, size, close);
 }
 
 /*[clinic input]
