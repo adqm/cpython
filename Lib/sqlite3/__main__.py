@@ -5,10 +5,11 @@ this module implements the REPL as a thin wrapper around
 the InteractiveConsole class from the 'code' stdlib module.
 """
 import sqlite3
+import os
 import sys
 
 from argparse import ArgumentParser
-from code import InteractiveConsole
+from cmd import Cmd
 from textwrap import dedent
 from _colorize import get_theme, theme_no_color
 
@@ -41,27 +42,49 @@ def execute(c, sql, suppress_errors=True, theme=theme_no_color):
             sys.exit(1)
 
 
-class SqliteInteractiveConsole(InteractiveConsole):
+class SqliteInteractiveConsole(Cmd):
     """A simple SQLite REPL."""
 
     def __init__(self, connection, use_color=False):
-        super().__init__()
+        super().__init__(completekey=None)
         self._con = connection
         self._cur = connection.cursor()
         self._use_color = use_color
+        theme = get_theme(force_no_color=not self._use_color)
+        s = theme.syntax
+        self.ps1 = f"{s.prompt}sqlite> {s.reset}"
+        self.ps2 = f"{s.prompt}    ... {s.reset}"
+        self.reset()
 
-    def runsource(self, source, filename="<input>", symbol="single"):
-        """Override runsource, the core of the InteractiveConsole REPL.
+    def reset(self):
+        self.buffer = []
+        self.prompt = self.ps1
 
-        Return True if more input is needed; buffering is done automatically.
-        Return False if input is a complete statement ready for execution.
+    def run_and_clear_buffer(self):
+        try:
+            execute(
+                self._cur,
+                os.linesep.join(self.buffer),
+                theme=get_theme(force_no_color=not self._use_color),
+            )
+        finally:
+            self.reset()
+
+    def onecmd(self, source):
+        """
+        Accept a single line of input.
+
+        Return True if it's time to exit the REPL.
+        Return False if we should loop again (either for fresh input or as part
+        of a multiline input.
         """
         theme = get_theme(force_no_color=not self._use_color)
 
         if not source or source.isspace():
             return False
+
         # Remember to update CLI_COMMANDS in _completer.py
-        if source[0] == ".":
+        if source[0] == "." and not self.buffer:
             match source[1:].strip():
                 case "version":
                     print(sqlite3.sqlite_version)
@@ -72,17 +95,21 @@ class SqliteInteractiveConsole(InteractiveConsole):
                           f"{t.builtin}.help{t.reset}       Print this help message\n"
                           f"{t.builtin}.quit{t.reset}       Exit the CLI, equivalent to CTRL-D\n")
                 case "quit":
-                    sys.exit(0)
+                    return True
                 case "":
                     pass
                 case _ as unknown:
                     t = theme.traceback
-                    self.write(f'{t.type}Error{t.reset}: {t.message}unknown '
-                               f'command: "{unknown}"{t.reset}\n')
+                    print(f'{t.type}Error{t.reset}: {t.message}unknown '
+                          f'command: "{unknown}"{t.reset}\n', file=sys.stderr)
+        elif source == "EOF":
+            return True
         else:
-            if not sqlite3.complete_statement(source):
-                return True
-            execute(self._cur, source, theme=theme)
+            self.buffer.append(source)
+            if not sqlite3.complete_statement(os.linesep.join(self.buffer)):
+                self.prompt = self.ps2
+                return False
+            self.run_and_clear_buffer()
         return False
 
 
@@ -143,9 +170,16 @@ def main(*args):
             execute(con, args.sql, suppress_errors=False, theme=theme)
         else:
             # No SQL provided; start the REPL.
+            print(banner, file=sys.stderr)
             with completer():
                 console = SqliteInteractiveConsole(con, use_color=True)
-                console.interact(banner, exitmsg="")
+                while True:
+                    try:
+                        console.cmdloop()
+                        break
+                    except KeyboardInterrupt:
+                        print("^C")
+                        console.reset()
     finally:
         con.close()
 
